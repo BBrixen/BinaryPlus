@@ -1,3 +1,8 @@
 $ this is a comment, please work
-output hello there, x
-output 'x' = x
+output hello there
+var str name = bennett patrick brixen
+output name, how are you today
+
+var int age = 19
+var bool cool = 1
+output you are age years old. and your 'cool' status is: cool
