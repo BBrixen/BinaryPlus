@@ -3,5 +3,5 @@ $ the value stored within name updates the value stored within description.
 $ which means it can affect previous lines of code
 $ (however it will not reach outside the current scope of this namespace)
 
-var bool testing = (false && true) || true
+var bool testing = 0 && 1
 output testing

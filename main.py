@@ -89,17 +89,26 @@ def bool_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) 
     :return: the boolean result of calculating everything in vals
     """
     vals = bool_replacement(line_num, line, vals, local_namespace)  # convert into all booleans or &&/||
-    return vals[0]  # just retun first in the list. need to convert into tree and evaulate
+    return vals[0]  # just return first in the list. need to convert into tree and evaluate
 
 
 def bool_replacement(line_num: int, line: str, vals: list[str], local_namespace: dict) -> list[bool | str]:
+    # TODO: need to accept ! for not
+    """
+    This searches through a boolean expression and replaces any variable names with booleans, and it also converts
+    true/True/1 to True and false/False/0 to false
+    :param line_num: the line of this expression for error message
+    :param line: the entire line for error message
+    :param vals: the vals to be converted into a list of bool vals
+    :param local_namespace: the variables which could contain boolean values
+    :return: a list of booleans and strings (the strings are && or ||)
+    """
     retval = []
     for i, val in enumerate(vals):
         if val in local_namespace:
-            if type(local_namespace[val]) == bool:
-                retval.append(local_namespace[val])
-            else:
+            if type(local_namespace[val]) is not bool:
                 raise BinPValueError(line_num, line, message="Invalid cast of type 'bool'")
+            retval.append(local_namespace[val])
             continue
 
         if val == 'true' or val == 'True' or val == '1':
