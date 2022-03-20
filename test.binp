@@ -1,8 +1,7 @@
-$ this is a comment, please work
-output hello there
-var str name = bennett patrick brixen
-output name, how are you today
+$ despite the fact that name is defined after description is,
+$ the value stored within name updates the value stored within description.
+$ which means it can affect previous lines of code
+$ (however it will not reach outside the current scope of this namespace)
 
-var int age = 19
-var bool cool = 1
-output you are age years old. and your 'cool' status is: cool
+var bool testing = (false && true) || true
+output testing

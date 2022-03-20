@@ -85,15 +85,33 @@ def bool_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) 
     :param line_num: the line number for error printing
     :param line: the entire line with the expression
     :param vals: a list of strings containing (hopefully) bools along with or/and/()
+    :param local_namespace: the namespace with possible boolean values to replace
     :return: the boolean result of calculating everything in vals
     """
-    val = vals[0]
-    if val == 'true' or val == 'True' or val == '1':
-        return True
-    elif val == 'false' or val == 'False' or val == '0':
-        return False
-    else:
-        raise BinPValueError(line_num, line, message="Invalid cast of type 'bool'")
+    vals = bool_replacement(line_num, line, vals, local_namespace)  # convert into all booleans or &&/||
+    return vals[0]  # just retun first in the list. need to convert into tree and evaulate
+
+
+def bool_replacement(line_num: int, line: str, vals: list[str], local_namespace: dict) -> list[bool | str]:
+    retval = []
+    for i, val in enumerate(vals):
+        if val in local_namespace:
+            if type(local_namespace[val]) == bool:
+                retval.append(local_namespace[val])
+            else:
+                raise BinPValueError(line_num, line, message="Invalid cast of type 'bool'")
+            continue
+
+        if val == 'true' or val == 'True' or val == '1':
+            retval.append(True)
+        elif val == 'false' or val == 'False' or val == '0':
+            retval.append(False)
+        elif val == '&&' or val == '||':
+            retval.append(val)
+        else:
+            raise BinPValueError(line_num, line, message="Invalid cast of type 'bool'")
+
+    return retval
 
 
 def str_eval(line: str, local_namespace: dict) -> str:
@@ -108,18 +126,20 @@ def str_eval(line: str, local_namespace: dict) -> str:
 
 
 def str_namespace_replacement(line: str, local_namespace: dict) -> str:
+    # TODO: fix this to search through all possible variable names first, then through the namespace
     """
     This nifty little function searches through a line and replaces every valid mention of a variable
     with its value inside the namespace
     :param line: the raw line possibly containing variable names
     :param local_namespace: the namespace with variable names and values
-    :return: the new line with variable names substitued with values
+    :return: the new line with variable names substituted with values
     """
     line += ' '
     for variable in local_namespace:
         var_len = len(variable)
 
-        for i in range(len(line) - var_len):
+        i = 0  # essentially a for loop, but since line changes inside the loop we have to use while
+        while i < len(line) - var_len:
             substring = line[i:i + var_len]
 
             if substring == variable and line[i + var_len] not in VALID_VARIABLE_CHARACTERS \
@@ -128,6 +148,7 @@ def str_namespace_replacement(line: str, local_namespace: dict) -> str:
                 # not a part of another word/variable
                 line = line[:i] + str(local_namespace[variable]) + \
                        line[i + var_len:]
+            i += 1
 
     return line[1:-1]
 
@@ -141,7 +162,6 @@ def output(line: str, local_namespace: dict) -> None:
     :param local_namespace: the namespace with every variable and its value
     :return: prints out the line to the console
     """
-
     print(str_namespace_replacement(line, local_namespace))
 
 
