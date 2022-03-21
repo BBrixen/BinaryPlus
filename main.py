@@ -1,5 +1,5 @@
 from errors import BinPSyntaxError, BinPValueError
-from binp_functions import create_function
+from binp_functions import create_function, call_function
 
 VALID_VARIABLE_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" \
                             "abcdefghijklmnopqrstuvwxy1234567890_'"
@@ -31,6 +31,9 @@ def parse_line(line_num: int, lines: list[str], local_namespace: dict) -> (dict,
 
         case ['var', *x]:
             local_namespace, line_num = var_assign(x, line_num, lines, local_namespace)
+
+        case [func_name, '(', *params, ')']:
+            call_function(line_num, lines[line_num], func_name, params, local_namespace)
 
         case default:
             raise BinPSyntaxError(line_num, default)
@@ -141,7 +144,8 @@ def str_eval(line: str, local_namespace: dict) -> str:
     :return: the string result of calculating everything in vals
     """
     after_assignment = "".join(line.split('=')[1:])
-    return namespace_replacement(after_assignment[1:], local_namespace)
+    return namespace_replacement(after_assignment, local_namespace)[2:]  # 2: to remove spaces at start
+
 
 
 def namespace_replacement(line: str, local_namespace: dict) -> str:
@@ -242,6 +246,13 @@ def run_program(lines: list[str], local_namespace: dict) -> None:
 
 
 def format_file(file) -> list[str]:
+    """
+    This takes the file and converts it into a formatted list of lines
+    We need to wrap certain characters in spaces so that they can be parsed easily with split()
+    This adds spaces around each instance of those characters
+    :param file: the file for the program
+    :return: a list of lines of code in this file
+    """
     lines = file.readlines()
     retval = []
     for line in lines:

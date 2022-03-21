@@ -1,11 +1,19 @@
-var bool x = 1
-output x
+var int func make12 = (int x) =>
+    output inside 'make12' we have parameter 'x' as x
+    var int x = 12
+    output the new 'x' is x
 
-var null func myFunc = (int x) =>
-var int x = 8
-output x
-end myFunc
+    var int func make6 = (int x) =>
+        output inside 'make6' we have parameter 'x' as x
+        var int x = 6
+        output the new 'x' is x
+    end make6
 
-output x
+    make6(x)
 
-run myFunc
+end make12
+
+var int x = 3
+output x
+make12(x)
+output x
