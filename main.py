@@ -1,11 +1,12 @@
 from errors import BinPSyntaxError, BinPValueError
+from binp_functions import create_function
 
 VALID_VARIABLE_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" \
                             "abcdefghijklmnopqrstuvwxy1234567890_'"
 ADD_SPACES = ['(', ')', '<', '>', '=', ' >  = ', ' <  = ']
 
 
-def parse_line(line_num: int, lines: list[str], local_namespace: dict) -> dict:
+def parse_line(line_num: int, lines: list[str], local_namespace: dict) -> (dict, int):
     """
     This is the highest level for parsing input. it handles:
         comments, output, variable assignment, if statements, while loops
@@ -19,7 +20,6 @@ def parse_line(line_num: int, lines: list[str], local_namespace: dict) -> dict:
             within a function call
     :return: the new namespace with added variables
     """
-
     match lines[line_num].split():
         case []:
             pass  # skip blank lines
@@ -30,14 +30,16 @@ def parse_line(line_num: int, lines: list[str], local_namespace: dict) -> dict:
             output(lines[line_num][7:], local_namespace)
 
         case ['var', *x]:
-            local_namespace = var_assign(x, line_num, lines, local_namespace)
+            local_namespace, line_num = var_assign(x, line_num, lines, local_namespace)
 
         case default:
             raise BinPSyntaxError(line_num, default)
-    return local_namespace
+
+    new_line = line_num + 1  # by default, we only move 1 line at a time
+    return local_namespace, new_line
 
 
-def var_assign(statements: list[str], line_num: int, lines: list[str], local_namespace: dict) -> dict:
+def var_assign(statements: list[str], line_num: int, lines: list[str], local_namespace: dict) -> (dict, int):
     """
     This handles a variable assignment statement
     it has the form
@@ -55,7 +57,7 @@ def var_assign(statements: list[str], line_num: int, lines: list[str], local_nam
     match statements:
         case [return_type, 'func', name, '=', '(', *params, ')', '=', '>']:
             # create function
-            local_namespace[name] = create_function(line_num, lines, return_type, name, params, local_namespace)
+            local_namespace[name], line_num = create_function(line_num, lines, return_type, name, params)
 
         case ['int', name, '=', *vals]:  # create int variable
             local_namespace[name] = int_eval(line_num, line, vals, local_namespace)
@@ -69,23 +71,7 @@ def var_assign(statements: list[str], line_num: int, lines: list[str], local_nam
         case _:
             raise BinPSyntaxError(line_num, line, message="Invalid variable assignment")
 
-    return local_namespace
-
-
-def create_function(line_num: int, lines: list[str], return_type: str, name: str,
-                    params: list[str], local_namespace: dict):
-    # TODO: make this also return an integer with the new line number after we have finished parsing the function
-    print(f'creating a function with return type: {return_type} and name: {name}')
-    print(f'it takes {params}')
-
-    # parse parameters
-    # build function (mostly just a list of strings which have not been interpreted yet)
-    # when we call, we just use run_program and pass in the correct scope
-
-    def new_func() -> None:
-        return
-
-    return new_func
+    return local_namespace, line_num
 
 
 def int_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) -> int:
@@ -250,8 +236,9 @@ def run_program(lines: list[str], local_namespace: dict) -> None:
     :param local_namespace: the namespace for this current program run
             this could be global for the entire program or a copy for functions
     """
-    for line_num in range(len(lines)):
-        local_namespace = parse_line(line_num, lines, local_namespace)
+    line_num: int = 0
+    while line_num < len(lines):
+        local_namespace, line_num = parse_line(line_num, lines, local_namespace)
 
 
 def format_file(file) -> list[str]:

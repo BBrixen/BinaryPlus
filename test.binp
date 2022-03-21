@@ -2,4 +2,10 @@ var bool x = 1
 output x
 
 var null func myFunc = (int x) =>
-output myFunc
+var int x = 8
+output x
+end myFunc
+
+output x
+
+run myFunc
