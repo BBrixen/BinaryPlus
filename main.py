@@ -2,6 +2,7 @@ from errors import BinPSyntaxError, BinPValueError
 
 VALID_VARIABLE_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" \
                             "abcdefghijklmnopqrstuvwxy1234567890_'"
+ADD_SPACES = ['(', ')', '<', '>', '=', ' >  = ', ' <  = ']
 
 
 def parse_line(line_num: int, line: str, local_namespace: dict) -> dict:
@@ -25,7 +26,7 @@ def parse_line(line_num: int, line: str, local_namespace: dict) -> dict:
             pass  # skip comments
 
         case ['output', *_]:
-            output(line[6:], local_namespace)
+            output(line[7:], local_namespace)
 
         case ['var', *x]:
             local_namespace = var_assign(x, line_num, line, local_namespace)
@@ -131,11 +132,11 @@ def str_eval(line: str, local_namespace: dict) -> str:
     :return: the string result of calculating everything in vals
     """
     after_assignment = "".join(line.split('=')[1:])
-    return str_namespace_replacement(after_assignment, local_namespace)
+    return str_namespace_replacement(after_assignment[1:], local_namespace)
 
 
 def str_namespace_replacement(line: str, local_namespace: dict) -> str:
-    # TODO: fix this to search through all possible variable names first, then through the namespace
+    # TODO: add support of tuple indexing in namespace search, this can be done in its own method
     """
     This nifty little function searches through a line and replaces every valid mention of a variable
     with its value inside the namespace
@@ -143,23 +144,61 @@ def str_namespace_replacement(line: str, local_namespace: dict) -> str:
     :param local_namespace: the namespace with variable names and values
     :return: the new line with variable names substituted with values
     """
-    line += ' '
-    for variable in local_namespace:
-        var_len = len(variable)
 
-        i = 0  # essentially a for loop, but since line changes inside the loop we have to use while
-        while i < len(line) - var_len:
-            substring = line[i:i + var_len]
+    for replacement in ADD_SPACES:
+        line = line.replace(replacement, f' {replacement} ')
 
-            if substring == variable and line[i + var_len] not in VALID_VARIABLE_CHARACTERS \
-                    and line[i - 1] not in VALID_VARIABLE_CHARACTERS:
-                # we have found a variable reference that is
-                # not a part of another word/variable
-                line = line[:i] + str(local_namespace[variable]) + \
-                       line[i + var_len:]
-            i += 1
+    i = 0
+    ignoring: bool = False  # used to ignore quoted sections
+    while i < len(line):
 
-    return line[1:-1]
+        match line[i]:
+            case ' ':  # don't count spaces
+                i += 1
+                continue
+            case "'":  # this starts and ends quoted sections
+                ignoring = not ignoring
+        if ignoring:
+            i += 1  # if it is quoted, then skip replacing it
+            continue
+
+        current_variable = find_variable_name(line, i)
+        line = replace_variable(line, i, current_variable, local_namespace)
+        i += 1
+
+    for replacement in ADD_SPACES:
+        line = line.replace(f' {replacement} ', replacement)
+
+    return line
+
+
+def find_variable_name(line: str, i: int) -> str:
+    """
+    We need to manually search for the next occurrence of a space, building a variable as we traverse
+    :param line: the line to search
+    :param i: current starting index which will construct a new variable
+    :return: int with the new index after reaching a space, and a string with the variable name we found
+    """
+    current_variable: str = line[i]
+    i += 1
+
+    while i < len(line):  # manually split by spaces
+        if line[i] == ' ':
+            break
+        current_variable += line[i]
+        i += 1
+
+    return current_variable
+
+
+def replace_variable(line: str, i: int, variable_name: str, local_namespace: dict) -> str:
+    if variable_name in local_namespace:
+        val = str(local_namespace[variable_name])
+        val = str_namespace_replacement(val, local_namespace)  # recursively call replacement to find nested variables
+        # we have found a variable reference that is
+        # not a part of another word/variable
+        line = line[:i] + val + line[i + len(variable_name):]
+    return line
 
 
 def output(line: str, local_namespace: dict) -> None:

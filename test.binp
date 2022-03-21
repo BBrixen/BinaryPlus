@@ -1,7 +1,9 @@
-$ despite the fact that name is defined after description is,
-$ the value stored within name updates the value stored within description.
-$ which means it can affect previous lines of code
-$ (however it will not reach outside the current scope of this namespace)
+$ you can have color coding
+var bool x = False
+output
 
-var bool testing = 0 && 1
-output testing
+$ quirky feature is working again
+var str desc = 'name' is name
+var str name = bennett
+var str name = desc
+output name
