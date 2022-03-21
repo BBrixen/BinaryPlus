@@ -1,9 +1,2 @@
-$ you can have color coding
-var bool x = False
-output
-
-$ quirky feature is working again
-var str desc = 'name' is name
-var str name = bennett
-var str name = desc
-output name
+var bool x = 1
+output x

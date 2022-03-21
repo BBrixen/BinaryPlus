@@ -112,14 +112,15 @@ def bool_replacement(line_num: int, line: str, vals: list[str], local_namespace:
             retval.append(local_namespace[val])
             continue
 
-        if val == 'true' or val == 'True' or val == '1':
-            retval.append(True)
-        elif val == 'false' or val == 'False' or val == '0':
-            retval.append(False)
-        elif val == '&&' or val == '||':
-            retval.append(val)
-        else:
-            raise BinPValueError(line_num, line, message="Invalid cast of type 'bool'")
+        match val:
+            case 'true' | 'True' | '1':
+                retval.append(True)
+            case 'false' | 'False' | '0':
+                retval.append(False)
+            case '&&' | '||':
+                retval.append(val)
+            case _:
+                raise BinPValueError(line_num, line, message="Invalid cast of type 'bool'")
 
     return retval
 
@@ -132,10 +133,10 @@ def str_eval(line: str, local_namespace: dict) -> str:
     :return: the string result of calculating everything in vals
     """
     after_assignment = "".join(line.split('=')[1:])
-    return str_namespace_replacement(after_assignment[1:], local_namespace)
+    return namespace_replacement(after_assignment[1:], local_namespace)
 
 
-def str_namespace_replacement(line: str, local_namespace: dict) -> str:
+def namespace_replacement(line: str, local_namespace: dict) -> str:
     # TODO: add support of tuple indexing in namespace search, this can be done in its own method
     """
     This nifty little function searches through a line and replaces every valid mention of a variable
@@ -194,9 +195,8 @@ def find_variable_name(line: str, i: int) -> str:
 def replace_variable(line: str, i: int, variable_name: str, local_namespace: dict) -> str:
     if variable_name in local_namespace:
         val = str(local_namespace[variable_name])
-        val = str_namespace_replacement(val, local_namespace)  # recursively call replacement to find nested variables
-        # we have found a variable reference that is
-        # not a part of another word/variable
+        # comment the line below to remove "weird feature"
+        # val = namespace_replacement(val, local_namespace)  # recursively call replacement to find nested variables
         line = line[:i] + val + line[i + len(variable_name):]
     return line
 
@@ -210,7 +210,7 @@ def output(line: str, local_namespace: dict) -> None:
     :param local_namespace: the namespace with every variable and its value
     :return: prints out the line to the console
     """
-    print(str_namespace_replacement(line, local_namespace))
+    print(namespace_replacement(line, local_namespace))
 
 
 def run_program(lines: list[str], local_namespace: dict) -> None:
