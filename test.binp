@@ -1,2 +1,5 @@
 var bool x = 1
 output x
+
+var null func myFunc = (int x) =>
+output myFunc

@@ -5,7 +5,7 @@ VALID_VARIABLE_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" \
 ADD_SPACES = ['(', ')', '<', '>', '=', ' >  = ', ' <  = ']
 
 
-def parse_line(line_num: int, line: str, local_namespace: dict) -> dict:
+def parse_line(line_num: int, lines: list[str], local_namespace: dict) -> dict:
     """
     This is the highest level for parsing input. it handles:
         comments, output, variable assignment, if statements, while loops
@@ -13,30 +13,31 @@ def parse_line(line_num: int, line: str, local_namespace: dict) -> dict:
     Each of these lines is passed into a new parser for that specific type
     It also throws CustomSyntaxErrors when parsing fails
     :param line_num: the current line number of the program
-    :param line: the current like we are looking at
+    :param lines: all the lines (needed to find end of functions)
     :param local_namespace: namespace of the current line being run.
             this can be the global namespace or a copied namespace
             within a function call
     :return: the new namespace with added variables
     """
-    match line.split():
+
+    match lines[line_num].split():
         case []:
             pass  # skip blank lines
         case ['$', *_]:
             pass  # skip comments
 
         case ['output', *_]:
-            output(line[7:], local_namespace)
+            output(lines[line_num][7:], local_namespace)
 
         case ['var', *x]:
-            local_namespace = var_assign(x, line_num, line, local_namespace)
+            local_namespace = var_assign(x, line_num, lines, local_namespace)
 
         case default:
             raise BinPSyntaxError(line_num, default)
     return local_namespace
 
 
-def var_assign(statements: list[str], line_num: int, line: str, local_namespace: dict) -> dict:
+def var_assign(statements: list[str], line_num: int, lines: list[str], local_namespace: dict) -> dict:
     """
     This handles a variable assignment statement
     it has the form
@@ -45,25 +46,46 @@ def var_assign(statements: list[str], line_num: int, line: str, local_namespace:
     :param statements: the list of statements comprising the variable assignment
             (without var because that has been removed)
     :param line_num: the line number for error messages
-    :param line: the lines with the variable assignment
+    :param lines: all the lines of this section of code
     :param local_namespace: the namespace which will be updates with the new variable
     :return: the new namespace with this variable added
     """
+    line = lines[line_num]
+
     match statements:
-        case ['int', name, '=', *vals]:
+        case [return_type, 'func', name, '=', '(', *params, ')', '=', '>']:
+            # create function
+            local_namespace[name] = create_function(line_num, lines, return_type, name, params, local_namespace)
+
+        case ['int', name, '=', *vals]:  # create int variable
             local_namespace[name] = int_eval(line_num, line, vals, local_namespace)
-            return local_namespace
 
-        case ['str', name, '=', *_]:
+        case ['str', name, '=', *_]:  # create string variable
             local_namespace[name] = str_eval(line, local_namespace)
-            return local_namespace
 
-        case ['bool', name, '=', *vals]:
+        case ['bool', name, '=', *vals]:  # create bool variable
             local_namespace[name] = bool_eval(line_num, line, vals, local_namespace)
-            return local_namespace
 
         case _:
             raise BinPSyntaxError(line_num, line, message="Invalid variable assignment")
+
+    return local_namespace
+
+
+def create_function(line_num: int, lines: list[str], return_type: str, name: str,
+                    params: list[str], local_namespace: dict):
+    # TODO: make this also return an integer with the new line number after we have finished parsing the function
+    print(f'creating a function with return type: {return_type} and name: {name}')
+    print(f'it takes {params}')
+
+    # parse parameters
+    # build function (mostly just a list of strings which have not been interpreted yet)
+    # when we call, we just use run_program and pass in the correct scope
+
+    def new_func() -> None:
+        return
+
+    return new_func
 
 
 def int_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) -> int:
@@ -146,9 +168,6 @@ def namespace_replacement(line: str, local_namespace: dict) -> str:
     :return: the new line with variable names substituted with values
     """
 
-    for replacement in ADD_SPACES:
-        line = line.replace(replacement, f' {replacement} ')
-
     i = 0
     ignoring: bool = False  # used to ignore quoted sections
     while i < len(line):
@@ -166,9 +185,6 @@ def namespace_replacement(line: str, local_namespace: dict) -> str:
         current_variable = find_variable_name(line, i)
         line = replace_variable(line, i, current_variable, local_namespace)
         i += 1
-
-    for replacement in ADD_SPACES:
-        line = line.replace(f' {replacement} ', replacement)
 
     return line
 
@@ -193,6 +209,15 @@ def find_variable_name(line: str, i: int) -> str:
 
 
 def replace_variable(line: str, i: int, variable_name: str, local_namespace: dict) -> str:
+    """
+    This replaces a possible variable name with its value in the namespace.
+    it edits the line which contains the variable
+    :param line: the line which might contain the variable
+    :param i: index of where the possible variable is located
+    :param variable_name: string of either normal text or a variable which needs to be replaced
+    :param local_namespace: namespace with variable names and values
+    :return: the line with a variable replacement made if needed
+    """
     if variable_name in local_namespace:
         val = str(local_namespace[variable_name])
         # comment the line below to remove "weird feature"
@@ -210,7 +235,12 @@ def output(line: str, local_namespace: dict) -> None:
     :param local_namespace: the namespace with every variable and its value
     :return: prints out the line to the console
     """
-    print(namespace_replacement(line, local_namespace))
+
+    line = namespace_replacement(line, local_namespace)
+    for replacement in ADD_SPACES:
+        line = line.replace(f' {replacement} ', replacement)
+
+    print(line)
 
 
 def run_program(lines: list[str], local_namespace: dict) -> None:
@@ -220,9 +250,20 @@ def run_program(lines: list[str], local_namespace: dict) -> None:
     :param local_namespace: the namespace for this current program run
             this could be global for the entire program or a copy for functions
     """
-    for line_num, line in enumerate(lines):
+    for line_num in range(len(lines)):
+        local_namespace = parse_line(line_num, lines, local_namespace)
+
+
+def format_file(file) -> list[str]:
+    lines = file.readlines()
+    retval = []
+    for line in lines:
         line = line.strip()  # remove extra whitespace and blank lines
-        local_namespace = parse_line(line_num, line, local_namespace)
+        for replacement in ADD_SPACES:
+            line = line.replace(replacement, f' {replacement} ')
+        retval.append(line)
+
+    return retval
 
 
 def main() -> None:
@@ -239,7 +280,8 @@ def main() -> None:
 
     try:
         file = open(filename)
-        run_program(file.readlines(), global_namespace)
+        lines = format_file(file)
+        run_program(lines, global_namespace)
     except FileNotFoundError:
         assert False, "File does not exist"
 
