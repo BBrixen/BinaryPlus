@@ -2,7 +2,8 @@
 
 from enum import Enum
 
-from errors import BinPSyntaxError
+# from errors import BinPSyntaxError
+
 
 class Operator(Enum):
     INT = object()
@@ -23,19 +24,20 @@ class Operator(Enum):
     EQUAL = object()
     NOT_EQUAL = object()
 
+
 BINARY_OPERATOR_MAP = {
-    Operator.ADD: lambda x, y : x + y,
-    Operator.SUB: lambda x, y : x - y,
-    Operator.DIV: lambda x, y : x // y,
-    Operator.MUL: lambda x, y : x * y,
-    Operator.OR: lambda x, y : x or y,
-    Operator.AND: lambda x, y : x and y,
-    Operator.GREATER_THAN: lambda x, y : x > y,
-    Operator.LESS_THAN: lambda x, y : x <= y,
-    Operator.GREATER_EQUAL: lambda x, y : x >= y,
-    Operator.LESS_EQUAL: lambda x, y : x <= y,
-    Operator.EQUAL: lambda x, y : x == y,
-    Operator.NOT_EQUAL: lambda x, y : x != y
+    Operator.ADD: lambda x, y: x + y,
+    Operator.SUB: lambda x, y: x - y,
+    Operator.DIV: lambda x, y: x // y,
+    Operator.MUL: lambda x, y: x * y,
+    Operator.OR: lambda x, y: x or y,
+    Operator.AND: lambda x, y: x and y,
+    Operator.GREATER_THAN: lambda x, y: x > y,
+    Operator.LESS_THAN: lambda x, y: x <= y,
+    Operator.GREATER_EQUAL: lambda x, y: x >= y,
+    Operator.LESS_EQUAL: lambda x, y: x <= y,
+    Operator.EQUAL: lambda x, y: x == y,
+    Operator.NOT_EQUAL: lambda x, y: x != y
 }
 
 
@@ -46,6 +48,7 @@ class OpNode:
         self.val = val
         self.left = None
         self.right = None
+
 
 def split_tokens(arr: list[str]):
     # Separate "(" and ")" into their own separate elements
@@ -83,7 +86,8 @@ def eval_tree(root: OpNode, namespace: dict[str]) -> int:
 def gen_math_tree(rhs: list[str], namespace: dict) -> OpNode:
     pass
 
-def gen_bool_tree(tokens, namespace) -> Operator:
+
+def gen_bool_tree(tokens, namespace) -> OpNode | None:
     # TODO Account for parenthesis
     root = bool_expr(tokens)
     return root
@@ -98,6 +102,7 @@ def bool_expr(tokens: list[str]):
     assert isinstance(mine, bool), "Token is not a boolean"  # TODO Proper exception
     lchild = OpNode(Operator.BOOL, mine)
     return bool_op(tokens, lchild)
+
 
 def bool_op(tokens: list[str], lchild: OpNode):
     if len(tokens) == 0:
