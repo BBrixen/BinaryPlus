@@ -4,7 +4,7 @@ from evaluators import namespace_replacement, determine_evaluator
 
 VALID_VARIABLE_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" \
                             "abcdefghijklmnopqrstuvwxy1234567890_'"
-ADD_SPACES = ['(', ')', '<', '>', '=', ' >  = ', ' <  = ']
+ADD_SPACES = ['(', ')', '<', '>', '!', '&&', '||', '=']
 
 
 def parse_line(line_num: int, lines: list[str], local_namespace: dict) -> (dict, int, list[str] | None):
@@ -37,7 +37,7 @@ def parse_line(line_num: int, lines: list[str], local_namespace: dict) -> (dict,
             call_function(line_num, lines[line_num], func_name, params, local_namespace)
 
         case ['return', *vals]:
-            return None, None, vals
+            return None, line_num, vals
 
         case default:
             raise BinPSyntaxError(line_num, default)
@@ -104,7 +104,7 @@ def run_program(lines: list[str], local_namespace: dict) -> (str, None | list[st
     while line_num < len(lines):
         local_namespace, line_num, retval = parse_line(line_num, lines, local_namespace)
         if retval is not None:
-            return lines[line_num-1], retval
+            return lines[line_num], retval
 
     return lines[line_num-1], None
 

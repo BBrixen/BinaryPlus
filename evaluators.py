@@ -151,6 +151,8 @@ def determine_evaluator(variable_type: str) -> EVAL_FUNC:
     This takes in a type and returns the specific evaluator function for that type
     :param variable_type: the type of the variable(s)
     :return: the evaluator function for that type
+
+    NOTE: ignore these type warnings, idk why pycharm is yelling at me, this is perfectly valid
     """
     match variable_type:
         case 'int':
@@ -160,6 +162,8 @@ def determine_evaluator(variable_type: str) -> EVAL_FUNC:
         case 'bool':
             return bool_eval
         case 'func':
+            pass
+        case 'null':
             pass
         case _:
             return str_eval

@@ -1,4 +1,5 @@
 from errors import BinPSyntaxError, BinPValueError, BinPArgumentError
+from evaluators import determine_evaluator
 
 
 class BinPFunction:
@@ -32,10 +33,20 @@ class BinPFunction:
 
         # modify the namespace with parameters passed in
         for i in range(len(self._params)):
-            function_namespace[self._params[i][1]] = params[i]  # TODO: need to check type
+            type_eval_func = determine_evaluator(self._params[i][0])
+            params[i] = type_eval_func(line_num, line, [params[i]], function_namespace)
+            function_namespace[self._params[i][1]] = params[i]
 
         end_line, function_return = run_program(self._lines, function_namespace)
-        return handle_return(end_line, function_return, self._return_type)
+
+        if function_return is None:
+            if self._return_type != 'null':
+                raise BinPValueError(line_num, line, message=f"Returned 'null' for type '{self._return_type}'")
+            return 'null'
+
+        return_eval = determine_evaluator(self._return_type)
+        return_val = return_eval(line_num, line, function_return, function_namespace)
+        return return_val
 
 
 def create_function(line_num: int, lines: list[str], return_type: str, name: str,
@@ -101,10 +112,6 @@ def parse_function_lines(line_num: int, lines: list[str], name: str) -> (list[st
         raise BinPSyntaxError(line_num, lines[line_num], message=f"Unable to find end of func '{name}'")
 
     return lines[line_num+1:end_line], end_line
-
-
-def handle_return(line: str, function_return: list[str], return_type: str):
-    pass
 
 
 def call_function(line_num: int, line: str, name: str, params: list[str], larger_namespace: dict):
