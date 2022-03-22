@@ -47,35 +47,35 @@ def int_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) -
 
 
 def bool_replacement(line_num: int, line: str, vals: list[str], local_namespace: dict) -> list[bool | str]:
-    # TODO: need to accept ! for not
     """
     This searches through a boolean expression and replaces any variable names with booleans, and it also converts
     true/True/1 to True and false/False/0 to false
+
+    This takes a recursive approach where we find the first value, add it to a list
+    and then call it on the rest of the values, creating an entire list as we go
     :param line_num: the line of this expression for error message
     :param line: the entire line for error message
     :param vals: the vals to be converted into a list of bool vals
     :param local_namespace: the variables which could contain boolean values
     :return: a list of booleans and strings (the strings are && or ||)
     """
-    retval = []
-    for i, val in enumerate(vals):
-        if val in local_namespace:
-            if type(local_namespace[val]) is not bool:
-                raise BinPValueError(line_num, line, message="Invalid cast of type 'bool'")
-            retval.append(local_namespace[val])
-            continue
-
-        match val:
-            case 'true' | 'True' | '1':
-                retval.append(True)
-            case 'false' | 'False' | '0':
-                retval.append(False)
-            case '&&' | '||' | '!' | '(' | ')':
-                retval.append(val)
-            case _:
-                raise BinPValueError(line_num, line, message="Invalid cast of type 'bool'")
-
-    return retval
+    match vals:
+        case []:
+            return []
+        case ['true' | 'True' | '1', *remaining]:
+            return [True] + bool_replacement(line_num, line, remaining, local_namespace)
+        case ['false' | 'False' | '0', *remaining]:
+            return [False] + bool_replacement(line_num, line, remaining, local_namespace)
+        case ['&&' | '||' | '!', *remaining]:
+            return [vals[0]] + bool_replacement(line_num, line, remaining, local_namespace)
+        case [func_name, '(', *remaining]:
+            index_of_end = remaining.index(')')
+            function_call_name = func_name + '(' + "".join(remaining[:index_of_end+1])
+            function_return = determine_namespace_value(line_num, line, function_call_name, local_namespace)
+            remaining = remaining[index_of_end+1:]
+            return [function_return] + bool_replacement(line_num, line, remaining, local_namespace)
+        case _:
+            raise BinPValueError(line_num, line, message="Invalid cast of type 'bool'")
 
 
 def namespace_replacement(line: str, local_namespace: dict) -> str:
@@ -167,3 +167,27 @@ def determine_evaluator(variable_type: str) -> EVAL_FUNC:
             pass
         case _:
             return str_eval
+
+
+def determine_namespace_value(line_num: int, line: str, variable_name: str, namespace: dict) -> str:
+    """
+    This will check if the variable exists in the namespace, either as a raw variable or as a function call
+    :param" variable_name: the name of the variable
+    :param namespace: namespace with all variable names
+    :return: string representation of the variable value
+    """
+    from binp_functions import call_function
+    if variable_name in namespace:
+        return namespace[variable_name]
+
+    if '(' in variable_name:
+        split_func = variable_name.split('(')
+        function_name = split_func[0]
+
+        function_params = split_func[1][:-1]  # [-1] to remove the ) at the end
+        function_params = function_params.split(',')
+        while '' in function_params:
+            function_params.remove('')
+
+        val = call_function(line_num, line, function_name, function_params, namespace)
+        return val

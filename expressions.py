@@ -91,7 +91,7 @@ def gen_math_tree(rhs: list[str]) -> OpNode:
 def gen_bool_tree(tokens) -> OpNode | None:
     # TODO Account for parenthesis
     # TODO Reverse list and pop off last element for better performance
-    print(tokens)
+    # print(tokens)
     root = bool_expr(tokens)
     return root
 

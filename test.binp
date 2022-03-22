@@ -2,4 +2,5 @@ var bool func boolFunc = () =>
 return true
 end boolFunc
 
-output boolFunc()
+var bool testBool = boolFunc()
+output testBool
