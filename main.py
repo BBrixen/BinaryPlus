@@ -1,5 +1,6 @@
 from errors import BinPSyntaxError, BinPValueError
 from binp_functions import create_function, call_function
+from expressions import gen_bool_tree, eval_tree
 
 VALID_VARIABLE_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" \
                             "abcdefghijklmnopqrstuvwxy1234567890_'"
@@ -271,7 +272,7 @@ def main() -> None:
     :return: the output for the program
     """
     # filename = input()
-    filename = 'test.binp'  # i have been using this for testing
+    filename = 'expressions.binp'  # i have been using this for testing
 
     global_namespace = {}
 

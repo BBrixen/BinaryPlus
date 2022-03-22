@@ -68,7 +68,7 @@ def split_tokens(arr: list[str]):
     return retval
 
 
-def eval_tree(root: OpNode, namespace: dict[str]) -> int:
+def eval_tree(root: OpNode, namespace: dict[str]) -> int | bool:
     match root.op:
         # TODO Functions and variables
         case Operator.INT | Operator.BOOL:
