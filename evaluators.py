@@ -17,8 +17,8 @@ def bool_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) 
     :return: the boolean result of calculating everything in vals
     """
     tokens = bool_replacement(line_num, line, vals, local_namespace)  # convert into all booleans or &&/||
-    root = gen_bool_tree(tokens, local_namespace)
-    return eval_tree(root, local_namespace)
+    root = gen_bool_tree(tokens)
+    return eval_tree(root)
 
 
 def str_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) -> str:
@@ -70,7 +70,7 @@ def bool_replacement(line_num: int, line: str, vals: list[str], local_namespace:
                 retval.append(True)
             case 'false' | 'False' | '0':
                 retval.append(False)
-            case '&&' | '||':
+            case '&&' | '||' | '!' | '(' | ')':
                 retval.append(val)
             case _:
                 raise BinPValueError(line_num, line, message="Invalid cast of type 'bool'")
