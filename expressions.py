@@ -12,9 +12,7 @@ class Operator(Enum):
     SUB = object()
     DIV = object()
     MUL = object()
-    # TODO Evaluate function and get return value (also make sure it returns an int)
-    FUNC_CALL = object()
-    VARIABLE = object()
+    UNARY_NOT = object()
     OR = object()
     AND = object()
     GREATER_THAN = object()
@@ -24,6 +22,12 @@ class Operator(Enum):
     EQUAL = object()
     NOT_EQUAL = object()
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}.{self.name}"
+
+    def __str__(self):
+        return self.name
+
 
 BINARY_OPERATOR_MAP = {
     Operator.ADD: lambda x, y: x + y,
@@ -32,8 +36,9 @@ BINARY_OPERATOR_MAP = {
     Operator.MUL: lambda x, y: x * y,
     Operator.OR: lambda x, y: x or y,
     Operator.AND: lambda x, y: x and y,
+
     Operator.GREATER_THAN: lambda x, y: x > y,
-    Operator.LESS_THAN: lambda x, y: x <= y,
+    Operator.LESS_THAN: lambda x, y: x < y,
     Operator.GREATER_EQUAL: lambda x, y: x >= y,
     Operator.LESS_EQUAL: lambda x, y: x <= y,
     Operator.EQUAL: lambda x, y: x == y,
@@ -43,52 +48,50 @@ BINARY_OPERATOR_MAP = {
 
 class OpNode:
     def __init__(self, op: Operator, val=None):
-        # Type hint is a string due to recursive definitions
         self.op = op
         self.val = val
         self.left = None
         self.right = None
 
 
-def split_tokens(arr: list[str]):
-    # Separate "(" and ")" into their own separate elements
-    retval = []
-    # TODO Also account for ! - boolean NOT
-    for item in arr:
-        if item.startswith("("):
-            retval.append("(")
-            retval.append(item.lstrip("("))
-        # Not elif since an item can start with "(" and end with ")"
-        if item.endswith(")"):
-            retval.append(item.rstrip(")"))
-            retval.append(")")
+# TODO Remove namespace? (Not used at the moment)
+def eval_tree(root: OpNode) -> int | bool:
+    """
+    Given a boolean tree or int tree, evaluate it into a single return value
+    Function calls and variables are not supported; each node must either contain
+    an operation or a constant value (10, false, etc.)
 
-        if not item.startswith("(") and not item.endswith(")"):
-            retval.append(item)
-    return retval
+    This function assumes all the nodes are comparable
+    (boolean operatores are not mixed with ints, etc.)
 
-
-def eval_tree(root: OpNode, namespace: dict[str]) -> int | bool:
+    :param root: The root of the expression tree
+    :return: the evaluated boolean or integer from the given expression tree
+    """
     match root.op:
-        # TODO Functions and variables
         case Operator.INT | Operator.BOOL:
             return root.val
 
-        # TODO Handle function calls and variables
+        case Operator.UNARY_NOT:
+            return not root.val
 
-        case x:
+        case x if x in BINARY_OPERATOR_MAP:
             binary_op_func = BINARY_OPERATOR_MAP[x]
-            left = eval_tree(root.left, namespace)
-            right = eval_tree(root.right, namespace)
+            left = eval_tree(root.left)
+            right = eval_tree(root.right)
             return binary_op_func(left, right)
 
+        case _:
+            assert False, "Invalid operator given"  # TODO Proper exception
 
-def gen_math_tree(rhs: list[str], namespace: dict) -> OpNode:
+
+def gen_math_tree(rhs: list[str]) -> OpNode:
     pass
 
 
-def gen_bool_tree(tokens, namespace) -> OpNode | None:
+def gen_bool_tree(tokens) -> OpNode | None:
     # TODO Account for parenthesis
+    # TODO Reverse list and pop off last element for better performance
+    print(tokens)
     root = bool_expr(tokens)
     return root
 
@@ -109,6 +112,7 @@ def bool_op(tokens: list[str], lchild: OpNode):
         return lchild  # Epsilon
 
     mine = tokens.pop(0)
+    # TODO Account for unary not
     if mine == "||":
         op = Operator.OR
     elif mine == "&&":
