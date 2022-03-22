@@ -1,0 +1,5 @@
+$ Operators && and || have the same precedence
+$ so this will make a right leaning tree
+$                 true && (false || true)
+var bool myBool = true &&  false || true
+output myBool
