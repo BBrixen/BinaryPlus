@@ -2,6 +2,9 @@
 # to hopefully decrease clutter in main.py
 from errors import BinPValueError
 from expressions import gen_bool_tree, eval_tree
+from collections.abc import Callable
+
+EVAL_FUNC = Callable[[int, str, list[int], dict], bool | str | int]
 
 
 def bool_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) -> bool:
@@ -16,6 +19,31 @@ def bool_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) 
     tokens = bool_replacement(line_num, line, vals, local_namespace)  # convert into all booleans or &&/||
     root = gen_bool_tree(tokens, local_namespace)
     return eval_tree(root, local_namespace)
+
+
+def str_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) -> str:
+    """
+    This is where we calculate a string expression
+    :param line: the entire line with the expression
+    :param local_namespace: the namespace for checking any variables
+    :return: the string result of calculating everything in vals
+    """
+    after_assignment = "".join(line.split('=')[1:])
+    return namespace_replacement(after_assignment, local_namespace)[2:]  # 2: to remove spaces at start
+
+
+def int_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) -> int:
+    """
+    This is where we compute an arithmetic expression for an integer
+    :param line_num: the line number for error printing
+    :param line: the entire line with the expression
+    :param vals: a list of strings containing (hopefully) ints and +-*/%()
+    :return: the integer result of calculating everything in vals
+    """
+    try:
+        return int(vals[0])
+    except ValueError:
+        raise BinPValueError(line_num, line, message="Invalid cast of type 'int'")
 
 
 def bool_replacement(line_num: int, line: str, vals: list[str], local_namespace: dict) -> list[bool | str]:
@@ -118,26 +146,20 @@ def replace_variable(line: str, i: int, variable_name: str, local_namespace: dic
     return line
 
 
-def str_eval(line: str, local_namespace: dict) -> str:
+def determine_evaluator(variable_type: str) -> EVAL_FUNC:
     """
-    This is where we calculate a string expression
-    :param line: the entire line with the expression
-    :param local_namespace: the namespace for checking any variables
-    :return: the string result of calculating everything in vals
+    This takes in a type and returns the specific evaluator function for that type
+    :param variable_type: the type of the variable(s)
+    :return: the evaluator function for that type
     """
-    after_assignment = "".join(line.split('=')[1:])
-    return namespace_replacement(after_assignment, local_namespace)[2:]  # 2: to remove spaces at start
-
-
-def int_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) -> int:
-    """
-    This is where we compute an arithmetic expression for an integer
-    :param line_num: the line number for error printing
-    :param line: the entire line with the expression
-    :param vals: a list of strings containing (hopefully) ints and +-*/%()
-    :return: the integer result of calculating everything in vals
-    """
-    try:
-        return int(vals[0])
-    except ValueError:
-        raise BinPValueError(line_num, line, message="Invalid cast of type 'int'")
+    match variable_type:
+        case 'int':
+            return int_eval
+        case 'str':
+            return str_eval
+        case 'bool':
+            return bool_eval
+        case 'func':
+            pass
+        case _:
+            return str_eval

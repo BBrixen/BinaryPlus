@@ -1,6 +1,6 @@
 from errors import BinPSyntaxError
 from binp_functions import create_function, call_function
-from evaluators import namespace_replacement, bool_eval, int_eval, str_eval
+from evaluators import namespace_replacement, determine_evaluator
 
 VALID_VARIABLE_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" \
                             "abcdefghijklmnopqrstuvwxy1234567890_'"
@@ -66,14 +66,9 @@ def var_assign(statements: list[str], line_num: int, lines: list[str], local_nam
             # create function
             local_namespace[name], line_num = create_function(line_num, lines, return_type, name, params)
 
-        case ['int', name, '=', *vals]:  # create int variable
-            local_namespace[name] = int_eval(line_num, line, vals, local_namespace)
-
-        case ['str', name, '=', *_]:  # create string variable
-            local_namespace[name] = str_eval(line, local_namespace)
-
-        case ['bool', name, '=', *vals]:  # create bool variable
-            local_namespace[name] = bool_eval(line_num, line, vals, local_namespace)
+        case [var_type, name, '=', *vals]:  # create int variable
+            eval_func = determine_evaluator(var_type)
+            local_namespace[name] = eval_func(line_num, line, vals, local_namespace)
 
         case _:
             raise BinPSyntaxError(line_num, line, message="Invalid variable assignment")
