@@ -100,8 +100,9 @@ def bool_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) 
     :param local_namespace: the namespace with possible boolean values to replace
     :return: the boolean result of calculating everything in vals
     """
-    vals = bool_replacement(line_num, line, vals, local_namespace)  # convert into all booleans or &&/||
-    return vals[0]  # just return first in the list. need to convert into tree and evaluate
+    tokens = bool_replacement(line_num, line, vals, local_namespace)  # convert into all booleans or &&/||
+    root = gen_bool_tree(tokens, local_namespace)
+    return eval_tree(root, local_namespace)
 
 
 def bool_replacement(line_num: int, line: str, vals: list[str], local_namespace: dict) -> list[bool | str]:
