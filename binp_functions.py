@@ -34,7 +34,8 @@ class BinPFunction:
         for i in range(len(self._params)):
             function_namespace[self._params[i][1]] = params[i]  # TODO: need to check type
 
-        run_program(self._lines, function_namespace)
+        end_line, function_return = run_program(self._lines, function_namespace)
+        return handle_return(end_line, function_return, self._return_type)
 
 
 def create_function(line_num: int, lines: list[str], return_type: str, name: str,
@@ -100,6 +101,10 @@ def parse_function_lines(line_num: int, lines: list[str], name: str) -> (list[st
         raise BinPSyntaxError(line_num, lines[line_num], message=f"Unable to find end of func '{name}'")
 
     return lines[line_num+1:end_line], end_line
+
+
+def handle_return(line: str, function_return: list[str], return_type: str):
+    pass
 
 
 def call_function(line_num: int, line: str, name: str, params: list[str], larger_namespace: dict):
