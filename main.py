@@ -27,16 +27,16 @@ def parse_line(line_num: int, lines: list[str], local_namespace: dict) -> (dict,
         case ['$', *_]:
             pass  # skip comments
 
-        case ['output', *_]:
+        case ['output', *_]:  # output a value
             output(lines[line_num][7:], local_namespace)
 
-        case ['var', *x]:
+        case ['var', *x]:  # variable assignment
             local_namespace, line_num = var_assign(x, line_num, lines, local_namespace)
 
-        case [func_name, '(', *params, ')']:
+        case [func_name, '(', *params, ')']:  # function call
             call_function(line_num, lines[line_num], func_name, params, local_namespace)
 
-        case ['return', *vals]:
+        case ['return', *vals]:  # returning a value
             return None, line_num, vals
 
         case default:
@@ -62,11 +62,11 @@ def var_assign(statements: list[str], line_num: int, lines: list[str], local_nam
     line = lines[line_num]
 
     match statements:
-        case [return_type, 'func', name, '=', '(', *params, ')', '=', '>']:
+        case [return_type, 'func', name, '=', '(', *params, ')', '=', '>']:  # function declaration
             # create function
             local_namespace[name], line_num = create_function(line_num, lines, return_type, name, params)
 
-        case [var_type, name, '=', *vals]:  # create int variable
+        case [var_type, name, '=', *vals]:  # create type variable
             eval_func = determine_evaluator(var_type)
             local_namespace[name] = eval_func(line_num, line, vals, local_namespace)
 
@@ -88,7 +88,7 @@ def output(line: str, local_namespace: dict) -> None:
 
     line = namespace_replacement(line, local_namespace)
     for replacement in ADD_SPACES:
-        line = line.replace(f' {replacement} ', replacement)
+        line = line.replace(f' {replacement} ', replacement)  # remove the spaces that we added previously
 
     print(line)
 
@@ -103,10 +103,10 @@ def run_program(lines: list[str], local_namespace: dict) -> (str, None | list[st
     line_num: int = 0
     while line_num < len(lines):
         local_namespace, line_num, retval = parse_line(line_num, lines, local_namespace)
-        if retval is not None:
+        if retval is not None:  # we got a return value from this function, so we need to pass on the return
             return lines[line_num], retval
 
-    return lines[line_num-1], None
+    return lines[line_num-1], None  # return none since there was no return in this section
 
 
 def format_file(file) -> list[str]:

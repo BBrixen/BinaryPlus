@@ -1,20 +1,5 @@
-var null func make12 = (int x) =>
-    output inside 'make12' we have parameter 'x' as x
-    var int x = 12
-    output the new 'x' is x
+var bool func boolFunc = () =>
+return true
+end boolFunc
 
-    var int func make6 = (int x) =>
-        output inside 'make6' we have parameter 'x' as x
-        var int x = 6
-        output the new 'x' is x
-        return 6
-    end make6
-
-    make6(x)
-
-end make12
-
-var int x = 3
-output x
-make12(x)
-output x
+output boolFunc()
