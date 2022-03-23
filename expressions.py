@@ -53,6 +53,9 @@ class OpNode:
         self.left = None
         self.right = None
 
+    def __repr__(self):
+        return f"OpNode({repr(self.op)},{repr(self.val)})"
+
 
 # TODO Remove namespace? (Not used at the moment)
 def eval_tree(root: OpNode) -> int | bool:
@@ -72,7 +75,7 @@ def eval_tree(root: OpNode) -> int | bool:
             return root.val
 
         case Operator.UNARY_NOT:
-            return not root.val
+            return not eval_tree(root.right)
 
         case x if x in BINARY_OPERATOR_MAP:
             binary_op_func = BINARY_OPERATOR_MAP[x]
@@ -84,12 +87,111 @@ def eval_tree(root: OpNode) -> int | bool:
             assert False, "Invalid operator given"  # TODO Proper exception
 
 
-def gen_math_tree(rhs: list[str]) -> OpNode:
-    pass
+def gen_math_tree(tokens: list[str]) -> OpNode:
+    """
+    Given a list of tokens representing a mathematical expression,
+    create a traversable tree that effectively represents evaluation heirarchy
+
+    :param tokens: a list of tokens where each item (parens, plus, ints, etc.)
+                   are separate elements within the list
+
+    :returns: the root of the expression tree
+    """
+    root = arith_expr(tokens)
+    return root
+
+"""
+Precedence (Lowest to Highest):
+    +, -
+    *, /
+    parenthesis
+
+arith_expr -> arith_term arith_expr1
+
+# left-factored and needs lchild
+arith_expr1 -> + arith_term arith_expr1
+             | - arith_term arith_expr1
+             | -- epsilon --
+
+arith_term -> arith_factor arith_term1
+
+# left-factored and needs lchild
+arith_term1 -> * arith_factor arith_term1
+             | / arith_factor arith_term1
+             | -- epsilon --
+
+arith_factor -> ( arith_expr )
+              | INTCON
+
+"""
+
+# TODO Docstrings
+
+def arith_expr(tokens: list[str]) -> OpNode:
+    lchild = arith_term(tokens)
+    return arith_expr1(tokens, lchild)
+
+
+def arith_expr1(tokens: list[str], lchild: OpNode) -> OpNode:
+    # Epsilon
+    if len(tokens) == 0:
+        return lchild
+
+    match tokens[0]:
+        case "+":
+            op = Operator.ADD
+        case "-":
+            op = Operator.SUB
+        case _:
+            # Epsilon
+            return lchild
+
+    tokens.pop(0)
+    root = OpNode(op)
+    root.left = lchild
+    root.right = arith_term(tokens)
+    return arith_expr1(tokens, root)
+
+
+def arith_term(tokens: list[str]) -> OpNode:
+    lchild = arith_factor(tokens)
+    return arith_term1(tokens, lchild)
+
+
+def arith_term1(tokens: list[str], lchild: OpNode) -> OpNode:
+    # Epsilon
+    if len(tokens) == 0:
+        return lchild
+
+    match tokens[0]:
+        case "*":
+            op = Operator.MUL
+        case "/":
+            op = Operator.DIV
+        case _:
+            # Epsilon
+            return lchild
+
+    tokens.pop(0)
+    root = OpNode(op)
+    root.left = lchild
+    root.right = arith_factor(tokens)
+
+    return arith_term1(tokens, root)
+
+def arith_factor(tokens: list[str]) -> OpNode:
+    mine = tokens.pop(0)
+    if isinstance(mine, int):
+        return OpNode(Operator.INT, mine)
+
+    assert mine == "(", "Invalid syntax. Expected parenthesis"  # TODO Proper exception
+    root = arith_expr(tokens)
+    assert tokens.pop(0) == ")", "Expected closing paranthesis"  # TODO Proper exception
+    return root
 
 
 def gen_bool_tree(tokens) -> OpNode | None:
-    # TODO Account for parenthesis
+    # TODO Account for parenthesis and negation
     # TODO Reverse list and pop off last element for better performance
     # print(tokens)
     root = bool_expr(tokens)
@@ -97,7 +199,6 @@ def gen_bool_tree(tokens) -> OpNode | None:
 
 
 def bool_expr(tokens: list[str]):
-    # TODO Account for parenthesis
     if len(tokens) == 0:
         return None
 
@@ -117,7 +218,6 @@ def bool_op(tokens: list[str], lchild: OpNode):
         op = Operator.OR
     elif mine == "&&":
         op = Operator.AND
-    # TODO NOT operator (need to ensure token list is set up correctly)
     else:
         assert False, "Incorrect boolean operator"  # TODO Proper exception
 

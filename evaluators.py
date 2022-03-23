@@ -1,7 +1,7 @@
 # this is where i want to put all the int_eval, bool_eval, str_eval, and func_eval functions
 # to hopefully decrease clutter in main.py
 from errors import BinPValueError
-from expressions import gen_bool_tree, eval_tree
+from expressions import gen_bool_tree, eval_tree, gen_math_tree
 from collections.abc import Callable
 
 EVAL_FUNC = Callable[[int, str, list[int], dict], bool | str | int]
@@ -32,6 +32,35 @@ def str_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) -
     return namespace_replacement(line_num, after_assignment, local_namespace)[2:]  # 2: to remove spaces at start
 
 
+def int_replacement(line_num: int, line: str, vals: list[str], local_namespace: dict) -> list[bool | str]:
+    """
+    This searches through a int expression and replaces any variable names with ints.
+    :param line_num: the line of this expression for error message
+    :param line: the entire line for error message
+    :param vals: the vals to be converted into a list of bool vals
+    :param local_namespace: the variables which could contain int values
+    :return: a list of booleans and strings (the strings for any integer operators)
+    """
+    retval = []
+    for i, val in enumerate(vals):
+        if val in local_namespace:
+            if not isinstance(local_namespace[val], int):
+                raise BinPValueError(line_num, line, message="Invalid cast of type 'int'")
+            retval.append(local_namespace[val])
+            continue
+
+        if isinstance(val, int):
+            retval.append(val)
+        elif val.lstrip("-").isdecimal():
+            retval.append(int(val))
+        elif val in {"+", "-", "*", "/", "(", ")"}:
+            retval.append(val)
+        else:
+            raise BinPValueError(line_num, line, message="Invalid cast of type 'int'")
+
+    return retval
+
+
 def int_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) -> int:
     """
     This is where we compute an arithmetic expression for an integer
@@ -40,10 +69,9 @@ def int_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) -
     :param vals: a list of strings containing (hopefully) ints and +-*/%()
     :return: the integer result of calculating everything in vals
     """
-    try:
-        return int(vals[0])
-    except ValueError:
-        raise BinPValueError(line_num, line, message="Invalid cast of type 'int'")
+    tokens = int_replacement(line_num, line, vals, local_namespace)
+    root = gen_math_tree(tokens)
+    return eval_tree(root)
 
 
 def bool_replacement(line_num: int, line: str, vals: list[str], local_namespace: dict) -> list[bool | str]:
@@ -57,7 +85,7 @@ def bool_replacement(line_num: int, line: str, vals: list[str], local_namespace:
     :param line: the entire line for error message
     :param vals: the vals to be converted into a list of bool vals
     :param local_namespace: the variables which could contain boolean values
-    :return: a list of booleans and strings (the strings are && or ||)
+    :return: a list of booleans and strings (the strings for any boolean operators)
     """
     match vals:
         case []:
