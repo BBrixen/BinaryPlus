@@ -62,9 +62,9 @@ def bool_replacement(line_num: int, line: str, vals: list[str], local_namespace:
     match vals:
         case []:
             return []
-        case ['true' | 'True' | '1', *remaining]:
+        case [True | 'true' | 'True' | '1', *remaining]:
             return [True] + bool_replacement(line_num, line, remaining, local_namespace)
-        case ['false' | 'False' | '0', *remaining]:
+        case [False | 'false' | 'False' | '0', *remaining]:
             return [False] + bool_replacement(line_num, line, remaining, local_namespace)
         case ['&&' | '||' | '!', *remaining]:
             return [vals[0]] + bool_replacement(line_num, line, remaining, local_namespace)
@@ -187,7 +187,8 @@ def determine_namespace_value(line_num: int, line: str, variable_name: str, name
         function_name = split_func[0]
 
         function_params = split_func[1][:-1]  # [-1] to remove the ) at the end
-        function_params = function_params.split(',')
+        function_params = [f.strip() for f in function_params.split(',')]
+
         while '' in function_params:
             function_params.remove('')
 

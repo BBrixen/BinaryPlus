@@ -1,11 +1,11 @@
 var bool func boolFunc = (bool y , bool z) =>
-output 'y' inside is y
-output 'z' inside is z
 return y && z
 end boolFunc
 
-var bool y = boolFunc(True, True)
-output 'y' outside is y
+var bool y = false
+var bool z = True
 
-var bool x = boolFunc(y, True) || boolFunc(False, False)
+var bool x = boolFunc(z, y)
+var bool y = boolFunc(y, z)
 output x
+output y

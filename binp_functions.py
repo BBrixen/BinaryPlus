@@ -34,12 +34,7 @@ class BinPFunction:
         # modify the namespace with parameters passed in
         for i in range(len(self._params)):
             type_eval_func = determine_evaluator(self._params[i][0])
-
-            params[i] = params[i].split(' ')  # this formats the parameters to be able to be evaluated
-            while '' in params[i]:
-                params[i].remove('')
-
-            params[i] = type_eval_func(line_num, line, params[i], function_namespace)
+            params[i] = type_eval_func(line_num, line, [params[i]], function_namespace)
             function_namespace[self._params[i][1]] = params[i]
 
         end_line, function_return = run_program(self._lines, function_namespace)
