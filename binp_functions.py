@@ -15,7 +15,7 @@ class BinPFunction:
         self._params = params
         self._lines = lines
 
-    def run(self, line_num: int, line: str, params: list[str], function_namespace: dict):
+    def run(self, line_num: int, line: str, params: list, function_namespace: dict):
         """
         This runs the function by calling run_program on the lines of code for this function
         :param line_num: line number for errors
@@ -34,7 +34,12 @@ class BinPFunction:
         # modify the namespace with parameters passed in
         for i in range(len(self._params)):
             type_eval_func = determine_evaluator(self._params[i][0])
-            params[i] = type_eval_func(line_num, line, [params[i]], function_namespace)
+
+            params[i] = params[i].split(' ')  # this formats the parameters to be able to be evaluated
+            while '' in params[i]:
+                params[i].remove('')
+
+            params[i] = type_eval_func(line_num, line, params[i], function_namespace)
             function_namespace[self._params[i][1]] = params[i]
 
         end_line, function_return = run_program(self._lines, function_namespace)
@@ -78,13 +83,19 @@ def parse_parameter_declaration(line_num, line, params: list[str]) -> list[(str,
     :param params: the parameters that need to be parsed
     :return: a list of (type, name) tuples for the parameters
     """
-    if len(params) % 2 != 0:
+    param_len = len(params)
+    if param_len % 3 != 2 and param_len != 0:
         raise BinPSyntaxError(line_num, line, message="Incorrect Parameter Declaration")
 
-    parsed_params = []
-    for i in range(0, len(params), 2):
+    parsed_params: list[(str, str)] = []
+    i = 0
+    while i <= param_len-2:
         type_name = (params[i], params[i+1])  # tuple of (type, name)
         parsed_params.append(type_name)
+
+        if i+2 < param_len and params[i+2] != ',':
+            raise BinPSyntaxError(line_num, line, message="Incorrect Parameter Declaration")
+        i += 3
 
     return parsed_params
 
@@ -130,7 +141,7 @@ def call_function(line_num: int, line: str, name: str, params: list[str], larger
     :return: the value which the function returns
     """
     if name not in larger_namespace:
-        raise BinPValueError(line_num, line, message=f"Unable to find function '{name}")
+        raise BinPValueError(line_num, line, message=f"Unable to find function '{name}'")
 
     for i in range(len(params)):
         if params[i] in larger_namespace:

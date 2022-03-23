@@ -1,10 +1,10 @@
 from errors import BinPSyntaxError
 from binp_functions import create_function, call_function
-from evaluators import namespace_replacement, determine_evaluator
+from evaluators import namespace_replacement, determine_evaluator, determine_namespace_value
 
 VALID_VARIABLE_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" \
                             "abcdefghijklmnopqrstuvwxy1234567890_'"
-ADD_SPACES = ['(', ')', '<', '>', '!', '&&', '||', '=']
+ADD_SPACES = ['(', ')', '<', '>', '!', '&&', '||', '=', ',']
 
 
 def parse_line(line_num: int, lines: list[str], local_namespace: dict) -> (dict, int, list[str] | None):
@@ -28,12 +28,13 @@ def parse_line(line_num: int, lines: list[str], local_namespace: dict) -> (dict,
             pass  # skip comments
 
         case ['output', *_]:  # output a value
-            output(lines[line_num][7:], local_namespace)
+            output(line_num, lines[line_num][7:], local_namespace)
 
         case ['var', *x]:  # variable assignment
             local_namespace, line_num = var_assign(x, line_num, lines, local_namespace)
 
         case [func_name, '(', *params, ')']:  # function call
+            params.remove(',')
             call_function(line_num, lines[line_num], func_name, params, local_namespace)
 
         case ['return', *vals]:  # returning a value
@@ -76,19 +77,20 @@ def var_assign(statements: list[str], line_num: int, lines: list[str], local_nam
     return local_namespace, line_num
 
 
-def output(line: str, local_namespace: dict) -> None:
+def output(line_num: int, line: str, local_namespace: dict) -> None:
     """
     This searches through the output message and replaces any instances of a
     variable with its value.it does not replace variables surrounded with "" or ''
+    :param line_num: the number of this line
     :param line: the line to be searched. this can contain normal strings and
             variable references
     :param local_namespace: the namespace with every variable and its value
     :return: prints out the line to the console
     """
 
-    line = namespace_replacement(line, local_namespace)
     for replacement in ADD_SPACES:
-        line = line.replace(f' {replacement} ', replacement)  # remove the spaces that we added previously
+        line = line.replace(f' {replacement} ', replacement)
+    line = namespace_replacement(line_num, line, local_namespace)
 
     print(line)
 

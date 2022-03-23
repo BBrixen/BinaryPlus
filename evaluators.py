@@ -29,7 +29,7 @@ def str_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) -
     :return: the string result of calculating everything in vals
     """
     after_assignment = "".join(line.split('=')[1:])
-    return namespace_replacement(after_assignment, local_namespace)[2:]  # 2: to remove spaces at start
+    return namespace_replacement(line_num, after_assignment, local_namespace)[2:]  # 2: to remove spaces at start
 
 
 def int_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) -> int:
@@ -70,23 +70,26 @@ def bool_replacement(line_num: int, line: str, vals: list[str], local_namespace:
             return [vals[0]] + bool_replacement(line_num, line, remaining, local_namespace)
         case [func_name, '(', *remaining]:
             index_of_end = remaining.index(')')
-            function_call_name = func_name + '(' + "".join(remaining[:index_of_end+1])
+            function_call_name = func_name + '(' + " ".join(remaining[:index_of_end+1])
             function_return = determine_namespace_value(line_num, line, function_call_name, local_namespace)
             remaining = remaining[index_of_end+1:]
             return [function_return] + bool_replacement(line_num, line, remaining, local_namespace)
-        case _:
-            raise BinPValueError(line_num, line, message="Invalid cast of type 'bool'")
+        case [variable, *remaining]:
+            value = determine_namespace_value(line_num, line, variable, local_namespace)
+            return [value] + bool_replacement(line_num, line, remaining, local_namespace)
 
 
-def namespace_replacement(line: str, local_namespace: dict) -> str:
+def namespace_replacement(line_num: int, line: str, local_namespace: dict) -> str:
     # TODO: add support of tuple indexing in namespace search, this can be done in its own method
     """
     This nifty little function searches through a line and replaces every valid mention of a variable
     with its value inside the namespace
+    :param line_num: the number of this line
     :param line: the raw line possibly containing variable names
     :param local_namespace: the namespace with variable names and values
     :return: the new line with variable names substituted with values
     """
+    line = line.replace(' ( ', '(').replace(' ) ', ')')
 
     i = 0
     ignoring: bool = False  # used to ignore quoted sections
@@ -103,7 +106,7 @@ def namespace_replacement(line: str, local_namespace: dict) -> str:
             continue
 
         current_variable = find_variable_name(line, i)
-        line = replace_variable(line, i, current_variable, local_namespace)
+        line = replace_variable(line_num, line, i, current_variable, local_namespace)
         i += 1
 
     return line
@@ -128,21 +131,20 @@ def find_variable_name(line: str, i: int) -> str:
     return current_variable
 
 
-def replace_variable(line: str, i: int, variable_name: str, local_namespace: dict) -> str:
+def replace_variable(line_num: int, line: str, i: int, variable_name: str, local_namespace: dict) -> str:
     """
     This replaces a possible variable name with its value in the namespace.
     it edits the line which contains the variable
+    :param line_num: the number for this line of code
     :param line: the line which might contain the variable
     :param i: index of where the possible variable is located
     :param variable_name: string of either normal text or a variable which needs to be replaced
     :param local_namespace: namespace with variable names and values
     :return: the line with a variable replacement made if needed
     """
-    if variable_name in local_namespace:
-        val = str(local_namespace[variable_name])
-        # comment the line below to remove "weird feature"
-        # val = namespace_replacement(val, local_namespace)  # recursively call replacement to find nested variables
-        line = line[:i] + val + line[i + len(variable_name):]
+
+    val = str(determine_namespace_value(line_num, line, variable_name, local_namespace))
+    line = line[:i] + val + line[i + len(val):]
     return line
 
 
@@ -191,3 +193,5 @@ def determine_namespace_value(line_num: int, line: str, variable_name: str, name
 
         val = call_function(line_num, line, function_name, function_params, namespace)
         return val
+
+    return variable_name
