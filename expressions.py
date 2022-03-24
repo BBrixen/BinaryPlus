@@ -2,6 +2,7 @@
 
 from enum import Enum
 
+
 # from errors import BinPSyntaxError
 
 
@@ -100,6 +101,7 @@ def gen_math_tree(tokens: list[str]) -> OpNode:
     root = arith_expr(tokens)
     return root
 
+
 """
 Precedence (Lowest to Highest):
     +, -
@@ -124,6 +126,7 @@ arith_factor -> ( arith_expr )
               | INTCON
 
 """
+
 
 # TODO Docstrings
 
@@ -179,6 +182,7 @@ def arith_term1(tokens: list[str], lchild: OpNode) -> OpNode:
 
     return arith_term1(tokens, root)
 
+
 def arith_factor(tokens: list[str]) -> OpNode:
     mine = tokens.pop(0)
     if isinstance(mine, int):
@@ -193,6 +197,8 @@ def arith_factor(tokens: list[str]) -> OpNode:
 def gen_bool_tree(tokens) -> OpNode | None:
     # TODO Account for parenthesis and negation
     # TODO Reverse list and pop off last element for better performance
+    #  maybe use an index parameter instead of popping elements
+    #  (check parse_function_call in bin_p_functions.py for an example)
     # print(tokens)
     root = bool_expr(tokens)
     return root

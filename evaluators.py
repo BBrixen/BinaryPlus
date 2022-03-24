@@ -205,8 +205,19 @@ def determine_evaluator(variable_type: str) -> EVAL_FUNC:
             return str_eval
 
 
-def replace_all_variables(line_num: int, line: str,vals: list[str], local_namespace: dict) -> list[str]:
+def replace_all_variables(line_num: int, line: str, vals: list[str], local_namespace: dict) -> list[str]:
+    """
+    This replaces every variable in the namespace with its value.
+    it then looks for every function call and evaluates its return
+    It the end we have a list of values which can be parsed into
+    a boolean or int tree
 
+    :param line_num: the current line number for error printing
+    :param line: the current line for error printing
+    :param vals: the values that need to be replaced with variables or function returns
+    :param local_namespace: the namespace with all variables and functions
+    :return: list of all values replaced with their evaluation in the namespace
+    """
     from binp_functions import BinPFunction, parse_function_call
 
     for i, val in enumerate(vals):

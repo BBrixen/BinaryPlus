@@ -1,8 +1,8 @@
 from errors import BinPSyntaxError
-from binp_functions import create_function, call_function
+from binp_functions import create_function, parse_function_call
 from evaluators import namespace_replacement, determine_evaluator
 
-ADD_SPACES = ['(', ')', '<', '>', '!', '&&', '||', '=', ',', '.']
+ADD_SPACES = ['(', ')', '<', '>', '!', '&&', '||', '=', ',', '.', '-', '*', '+', '/']
 
 
 def parse_line(line_num: int, lines: list[str], local_namespace: dict) -> (dict, int, list[str] | None):
@@ -32,8 +32,7 @@ def parse_line(line_num: int, lines: list[str], local_namespace: dict) -> (dict,
             local_namespace, line_num = var_assign(x, line_num, lines, local_namespace)
 
         case [func_name, '(', *params, ')']:  # function call
-            params.remove(',')
-            call_function(line_num, lines[line_num], func_name, params, local_namespace)
+            parse_function_call(line_num, lines[line_num], [func_name, '(', *params, ')'], local_namespace)
 
         case ['return', *vals]:  # returning a value
             return None, line_num, vals

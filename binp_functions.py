@@ -32,6 +32,8 @@ class BinPFunction:
 
         # make sure the parameters passed are the correct length
         if len(params) != len(self._params):
+            print(f'expected {self._params}')
+            print(f'got {params}')
             raise BinPArgumentError(line_num, line, message=f"Incorrect number of arguments in {self._name} call")
 
         # modify the namespace with parameters passed in
@@ -148,11 +150,13 @@ def call_function(line_num: int, line: str, name: str, params: list[str], larger
             (besides storing return values)
     :return: the value which the function returns
     """
-    print(params)
     if name not in larger_namespace:
         raise BinPValueError(line_num, line, message=f"Unable to find function '{name}'")
 
-    for i in range(len(params)):  # TODO: pretty sure i can remove this section
+    while ',' in params:
+        params.remove(',')  # this expects there to be no commas
+
+    for i in range(len(params)):  # this is needed we call a function on a line without any evaluation
         if params[i] in larger_namespace:
             params[i] = larger_namespace[params[i]]
 
@@ -160,33 +164,51 @@ def call_function(line_num: int, line: str, name: str, params: list[str], larger
     return func.run(line_num, line, params, larger_namespace.copy())
 
 
-def parse_function_call(line_num: int, line: str, vals: list[str], namespace: dict, index=0) -> (list[str], int):
+def parse_function_call(line_num: int, line: str, vals: list[str], namespace: dict,
+                        index=0, depth=0) -> (list[str], int):
     """
-    Man this one is an interesting function
+    This takes a list of values and recursively parses it into smaller
+    function calls until we are at a base case.
+    In that situation it calls the function and passes its return value
+    to its caller. This means the value returns up the tree and continues
+    to be used in further function calls.
+
+    The end result is the list of values passed in, but every function
+    call is replaced with its return value. This can then be stored as
+    a parameter, or evaluated as a parameter in another function call
+    (hence the recursive nature)
 
     :param line_num: the line number of the function parsing
     :param line: which line we are on for error printing
     :param vals: the values to parse for this current call
     :param namespace: used for running the function
+    :param index: the index in this list to use. this is faster than popping, removing items, or slicing
+    :param depth: the current function depth we are in,
+            use this to evaluate parenthesis-wrapped expression inside functions
     :return: a list of values with function calls substituted in
             it also returns the index in the list where to continue parsing
     """
+    # TODO: implement depth so we can have (2+3) inside a function parameter
 
     i = index
     parsed_vals = []
     while i < len(vals):
         try:
             if vals[i] in namespace and isinstance(namespace[vals[i]], BinPFunction) and vals[i+1] == '(':
-                function_params, end_i = parse_function_call(line_num, line, vals, namespace, index=i+2)
-                while ',' in function_params:
-                    function_params.remove(',')
+                # if we have found a function name, and it has a parenthesis after it
+                function_params, end_i = parse_function_call(line_num, line, vals, namespace, index=i+2, depth=1)
 
+                # parsed the parameters recursively, now evaluate this function call
                 function_return = call_function(line_num, line, vals[i], function_params, namespace)
                 parsed_vals.append(function_return)
-                i = end_i
+                i = end_i  # end_i is the index after we have evaluated this function,
+                # that way we don't parse over already-parsed data
 
-            elif vals[i] == ')':
-                return parsed_vals, i
+            elif vals[i] == ')':  # reaching a ) means we closed out of the function call
+                if depth > 0:
+                    return parsed_vals, i
+                else:
+                    parsed_vals.append(vals[i])
             else:
                 parsed_vals.append(vals[i])
         except IndexError:
