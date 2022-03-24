@@ -2,8 +2,6 @@ from errors import BinPSyntaxError
 from binp_functions import create_function, call_function
 from evaluators import namespace_replacement, determine_evaluator
 
-VALID_VARIABLE_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" \
-                            "abcdefghijklmnopqrstuvwxy1234567890_'"
 ADD_SPACES = ['(', ')', '<', '>', '!', '&&', '||', '=', ',', '.']
 
 
@@ -88,9 +86,9 @@ def output(line_num: int, line: str, local_namespace: dict) -> None:
     :return: prints out the line to the console
     """
 
+    line = namespace_replacement(line_num, line, local_namespace)
     for replacement in ADD_SPACES:
         line = line.replace(f' {replacement} ', replacement)
-    line = namespace_replacement(line_num, line, local_namespace)
 
     print(f' >> {line}')
 

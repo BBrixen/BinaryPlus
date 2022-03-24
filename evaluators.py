@@ -5,6 +5,8 @@ from expressions import gen_bool_tree, eval_tree, gen_math_tree
 from collections.abc import Callable
 
 EVAL_FUNC = Callable[[int, str, list[int], dict], bool | str | int]
+VALID_VARIABLE_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" \
+                            "abcdefghijklmnopqrstuvwxy1234567890_'"
 
 
 def int_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) -> int:
@@ -119,8 +121,6 @@ def namespace_replacement(line_num: int, line: str, local_namespace: dict) -> st
     :param local_namespace: the namespace with variable names and values
     :return: the new line with variable names substituted with values
     """
-    line = line.replace(' ( ', '(').replace(' ) ', ')')
-
     i = 0
     ignoring: bool = False  # used to ignore quoted sections
     while i < len(line):
@@ -135,14 +135,14 @@ def namespace_replacement(line_num: int, line: str, local_namespace: dict) -> st
             i += 1  # if it is quoted, then skip replacing it
             continue
 
-        current_variable = find_variable_name(line, i)
+        current_variable, new_i = find_variable_name(line, i)
         line, i_change = replace_variable(line_num, line, i, current_variable, local_namespace)
-        i += i_change
+        i = new_i + i_change
 
     return line
 
 
-def find_variable_name(line: str, i: int) -> str:
+def find_variable_name(line: str, i: int) -> (str, int):
     """
     We need to manually search for the next occurrence of a space, building a variable as we traverse
     :param line: the line to search
@@ -158,7 +158,7 @@ def find_variable_name(line: str, i: int) -> str:
         current_variable += line[i]
         i += 1
 
-    return current_variable
+    return current_variable, i
 
 
 def replace_variable(line_num: int, line: str, i: int, variable_name: str, local_namespace: dict) -> (str, int):
@@ -178,7 +178,7 @@ def replace_variable(line_num: int, line: str, i: int, variable_name: str, local
     if variable_name in local_namespace and not isinstance(local_namespace[variable_name], BinPFunction):
         val = str(local_namespace[variable_name])
         change += len(val)
-        line = line[:i] + val + line[i + len(val):]
+        line = line[:i] + val + line[i + len(variable_name):]
     return line, change
 
 
