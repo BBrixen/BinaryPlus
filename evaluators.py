@@ -172,9 +172,10 @@ def replace_variable(line_num: int, line: str, i: int, variable_name: str, local
     :param local_namespace: namespace with variable names and values
     :return: the line with a variable replacement made if needed
     """
+    from binp_functions import BinPFunction
     change = 1
 
-    if variable_name in local_namespace:
+    if variable_name in local_namespace and not isinstance(local_namespace[variable_name], BinPFunction):
         val = str(local_namespace[variable_name])
         change += len(val)
         line = line[:i] + val + line[i + len(val):]
@@ -214,4 +215,7 @@ def replace_all_variables(vals: list[str], local_namespace: dict) -> list[str]:
             vals[i] = local_namespace[val]
 
     print(f'returning the following list:\n{vals}')
+
+    # TODO: now parse the functions, do this in a method within binp_functions
+
     return vals
