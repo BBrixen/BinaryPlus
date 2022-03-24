@@ -32,7 +32,7 @@ def int_replacement(line_num: int, line: str, vals: list[str], local_namespace: 
     :param local_namespace: the variables which could contain int values
     :return: a list of booleans and strings (the strings for any integer operators)
     """
-    vals = replace_all_variables(vals, local_namespace)
+    vals = replace_all_variables(line_num, line, vals, local_namespace)
     retval = []
 
     for i, val in enumerate(vals):
@@ -81,7 +81,7 @@ def bool_replacement(line_num: int, line: str, vals: list[str], local_namespace:
     :param local_namespace: the variables which could contain boolean values
     :return: a list of booleans and strings (the strings for any boolean operators)
     """
-    vals = replace_all_variables(vals, local_namespace)
+    vals = replace_all_variables(line_num, line, vals, local_namespace)
     retval = []
 
     for val in vals:
@@ -205,17 +205,14 @@ def determine_evaluator(variable_type: str) -> EVAL_FUNC:
             return str_eval
 
 
-def replace_all_variables(vals: list[str], local_namespace: dict) -> list[str]:
+def replace_all_variables(line_num: int, line: str,vals: list[str], local_namespace: dict) -> list[str]:
 
-    from binp_functions import BinPFunction
-    print(f'taking in the following list:\n{vals}')
+    from binp_functions import BinPFunction, parse_function_call
 
     for i, val in enumerate(vals):
         if val in local_namespace and not isinstance(local_namespace[val], BinPFunction):
             vals[i] = local_namespace[val]
 
-    print(f'returning the following list:\n{vals}')
-
-    # TODO: now parse the functions, do this in a method within binp_functions
+    vals, i = parse_function_call(line_num, line, vals, local_namespace)
 
     return vals

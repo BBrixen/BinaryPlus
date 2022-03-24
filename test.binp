@@ -2,10 +2,12 @@ var int func add = (int x, int y) =>
 return x + y
 end add
 
+var int func mul = (int x, int y) =>
+return x * y
+end mul
+
 var int start = 3
 var int x = 5 + 6
-var int y = x + 3 * x - 6 - (x * (x + 2))
-output y\
-var str y = this is a really long string im going to make it longer
+var int y = x * add(x, add(add(1, 2), add(1, 1))) + mul(x, start)
 
-output end_val, ,y) .x
+output x * add(x, add(start, 2)) + mul(x, start) = y

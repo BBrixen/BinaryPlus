@@ -15,6 +15,9 @@ class BinPFunction:
         self._params = params
         self._lines = lines
 
+    def __str__(self):
+        return f'{self._name} takes {self._params} and returns {self._return_type}'
+
     def run(self, line_num: int, line: str, params: list, function_namespace: dict):
         """
         This runs the function by calling run_program on the lines of code for this function
@@ -47,6 +50,16 @@ class BinPFunction:
         return_eval = determine_evaluator(self._return_type)
         return_val = return_eval(line_num, line, function_return, function_namespace)
         return return_val
+
+
+class FunctionTree:
+    def __init__(self, binp_function: BinPFunction, vals: list[str]):
+        self._function = binp_function
+        self._vals_to_parse = vals
+
+    def __repr__(self):
+        return f'{self._function}' \
+               f'we have these values: {self._vals_to_parse}'
 
 
 def create_function(line_num: int, lines: list[str], return_type: str, name: str,
@@ -135,12 +148,50 @@ def call_function(line_num: int, line: str, name: str, params: list[str], larger
             (besides storing return values)
     :return: the value which the function returns
     """
+    print(params)
     if name not in larger_namespace:
         raise BinPValueError(line_num, line, message=f"Unable to find function '{name}'")
 
-    for i in range(len(params)):
+    for i in range(len(params)):  # TODO: pretty sure i can remove this section
         if params[i] in larger_namespace:
             params[i] = larger_namespace[params[i]]
 
     func: BinPFunction = larger_namespace[name]
     return func.run(line_num, line, params, larger_namespace.copy())
+
+
+def parse_function_call(line_num: int, line: str, vals: list[str], namespace: dict, index=0) -> (list[str], int):
+    """
+    Man this one is an interesting function
+
+    :param line_num: the line number of the function parsing
+    :param line: which line we are on for error printing
+    :param vals: the values to parse for this current call
+    :param namespace: used for running the function
+    :return: a list of values with function calls substituted in
+            it also returns the index in the list where to continue parsing
+    """
+
+    i = index
+    parsed_vals = []
+    while i < len(vals):
+        try:
+            if vals[i] in namespace and isinstance(namespace[vals[i]], BinPFunction) and vals[i+1] == '(':
+                function_params, end_i = parse_function_call(line_num, line, vals, namespace, index=i+2)
+                while ',' in function_params:
+                    function_params.remove(',')
+
+                function_return = call_function(line_num, line, vals[i], function_params, namespace)
+                parsed_vals.append(function_return)
+                i = end_i
+
+            elif vals[i] == ')':
+                return parsed_vals, i
+            else:
+                parsed_vals.append(vals[i])
+        except IndexError:
+            raise BinPSyntaxError(line_num, line, message="Improper end to function call")
+
+        i += 1
+
+    return parsed_vals, len(vals)
