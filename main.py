@@ -1,10 +1,10 @@
 from errors import BinPSyntaxError
 from binp_functions import create_function, call_function
-from evaluators import namespace_replacement, determine_evaluator, determine_namespace_value
+from evaluators import namespace_replacement, determine_evaluator
 
 VALID_VARIABLE_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" \
                             "abcdefghijklmnopqrstuvwxy1234567890_'"
-ADD_SPACES = ['(', ')', '<', '>', '!', '&&', '||', '=', ',']
+ADD_SPACES = ['(', ')', '<', '>', '!', '&&', '||', '=', ',', '.']
 
 
 def parse_line(line_num: int, lines: list[str], local_namespace: dict) -> (dict, int, list[str] | None):
@@ -92,7 +92,7 @@ def output(line_num: int, line: str, local_namespace: dict) -> None:
         line = line.replace(f' {replacement} ', replacement)
     line = namespace_replacement(line_num, line, local_namespace)
 
-    print(line)
+    print(f' >> {line}')
 
 
 def run_program(lines: list[str], local_namespace: dict) -> (str, None | list[str]):

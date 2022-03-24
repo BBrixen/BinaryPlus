@@ -1,11 +1,11 @@
-var bool func boolFunc = (bool y , bool z) =>
-return y && z
-end boolFunc
+var int func add = (int x, int y) =>
+return x + y
+end add
 
-var bool y = false
-var bool z = True
-
-var bool x = boolFunc(z, y)
-var bool y = boolFunc(y, z)
-output x
+var int start = 3
+var int x = 5 + 6
+var int y = x + 3 * x - 6
 output y
+var int end_val = add(1, 2) + add(x, y) - add(add(x, x), add(y, y))
+
+output end_val

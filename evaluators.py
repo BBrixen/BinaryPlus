@@ -7,29 +7,18 @@ from collections.abc import Callable
 EVAL_FUNC = Callable[[int, str, list[int], dict], bool | str | int]
 
 
-def bool_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) -> bool:
+def int_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) -> int:
     """
-    This is where we compute a boolean expression
+    This is where we compute an arithmetic expression for an integer
     :param line_num: the line number for error printing
     :param line: the entire line with the expression
-    :param vals: a list of strings containing (hopefully) bools along with or/and/()
-    :param local_namespace: the namespace with possible boolean values to replace
-    :return: the boolean result of calculating everything in vals
+    :param vals: a list of strings containing (hopefully) ints and +-*/%()
+    :param local_namespace: the namespace with all variables in it
+    :return: the integer result of calculating everything in vals
     """
-    tokens = bool_replacement(line_num, line, vals, local_namespace)  # convert into all booleans or &&/||
-    root = gen_bool_tree(tokens)
+    tokens = int_replacement(line_num, line, vals, local_namespace)
+    root = gen_math_tree(tokens)
     return eval_tree(root)
-
-
-def str_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) -> str:
-    """
-    This is where we calculate a string expression
-    :param line: the entire line with the expression
-    :param local_namespace: the namespace for checking any variables
-    :return: the string result of calculating everything in vals
-    """
-    after_assignment = "".join(line.split('=')[1:])
-    return namespace_replacement(line_num, after_assignment, local_namespace)[2:]  # 2: to remove spaces at start
 
 
 def int_replacement(line_num: int, line: str, vals: list[str], local_namespace: dict) -> list[bool | str]:
@@ -41,7 +30,9 @@ def int_replacement(line_num: int, line: str, vals: list[str], local_namespace: 
     :param local_namespace: the variables which could contain int values
     :return: a list of booleans and strings (the strings for any integer operators)
     """
+    vals = replace_all_variables(vals, local_namespace)
     retval = []
+
     for i, val in enumerate(vals):
         if val in local_namespace:
             if not isinstance(local_namespace[val], int):
@@ -61,16 +52,17 @@ def int_replacement(line_num: int, line: str, vals: list[str], local_namespace: 
     return retval
 
 
-def int_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) -> int:
+def bool_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) -> bool:
     """
-    This is where we compute an arithmetic expression for an integer
+    This is where we compute a boolean expression
     :param line_num: the line number for error printing
     :param line: the entire line with the expression
-    :param vals: a list of strings containing (hopefully) ints and +-*/%()
-    :return: the integer result of calculating everything in vals
+    :param vals: a list of strings containing (hopefully) bools along with or/and/()
+    :param local_namespace: the namespace with possible boolean values to replace
+    :return: the boolean result of calculating everything in vals
     """
-    tokens = int_replacement(line_num, line, vals, local_namespace)
-    root = gen_math_tree(tokens)
+    tokens = bool_replacement(line_num, line, vals, local_namespace)  # convert into all booleans or &&/||
+    root = gen_bool_tree(tokens)
     return eval_tree(root)
 
 
@@ -87,24 +79,34 @@ def bool_replacement(line_num: int, line: str, vals: list[str], local_namespace:
     :param local_namespace: the variables which could contain boolean values
     :return: a list of booleans and strings (the strings for any boolean operators)
     """
-    match vals:
-        case []:
-            return []
-        case [True | 'true' | 'True' | '1', *remaining]:
-            return [True] + bool_replacement(line_num, line, remaining, local_namespace)
-        case [False | 'false' | 'False' | '0', *remaining]:
-            return [False] + bool_replacement(line_num, line, remaining, local_namespace)
-        case ['&&' | '||' | '!', *remaining]:
-            return [vals[0]] + bool_replacement(line_num, line, remaining, local_namespace)
-        case [func_name, '(', *remaining]:
-            index_of_end = remaining.index(')')
-            function_call_name = func_name + '(' + " ".join(remaining[:index_of_end+1])
-            function_return = determine_namespace_value(line_num, line, function_call_name, local_namespace)
-            remaining = remaining[index_of_end+1:]
-            return [function_return] + bool_replacement(line_num, line, remaining, local_namespace)
-        case [variable, *remaining]:
-            value = determine_namespace_value(line_num, line, variable, local_namespace)
-            return [value] + bool_replacement(line_num, line, remaining, local_namespace)
+    vals = replace_all_variables(vals, local_namespace)
+    retval = []
+
+    for val in vals:
+        match val:
+            case True | 'true' | 'True' | '1':
+                retval.append(True)
+            case False | 'false' | 'False' | '0':
+                retval.append(False)
+            case '&&' | '||' | '!':
+                retval.append(val)
+            case _:
+                raise BinPValueError(line_num, line, message="Invalid cast of type 'bool'")
+
+    return retval
+
+
+def str_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) -> str:
+    """
+    This is where we calculate a string expression
+    :param line_num: the current line in the program
+    :param line: the entire line with the expression
+    :param vals: the line split by spaces
+    :param local_namespace: the namespace for checking any variables
+    :return: the string result of calculating everything in vals
+    """
+    after_assignment = "".join(line.split('=')[1:])
+    return namespace_replacement(line_num, after_assignment, local_namespace)[2:]  # 2: to remove spaces at start
 
 
 def namespace_replacement(line_num: int, line: str, local_namespace: dict) -> str:
@@ -134,8 +136,8 @@ def namespace_replacement(line_num: int, line: str, local_namespace: dict) -> st
             continue
 
         current_variable = find_variable_name(line, i)
-        line = replace_variable(line_num, line, i, current_variable, local_namespace)
-        i += 1
+        line, i_change = replace_variable(line_num, line, i, current_variable, local_namespace)
+        i += i_change
 
     return line
 
@@ -159,7 +161,7 @@ def find_variable_name(line: str, i: int) -> str:
     return current_variable
 
 
-def replace_variable(line_num: int, line: str, i: int, variable_name: str, local_namespace: dict) -> str:
+def replace_variable(line_num: int, line: str, i: int, variable_name: str, local_namespace: dict) -> (str, int):
     """
     This replaces a possible variable name with its value in the namespace.
     it edits the line which contains the variable
@@ -170,10 +172,13 @@ def replace_variable(line_num: int, line: str, i: int, variable_name: str, local
     :param local_namespace: namespace with variable names and values
     :return: the line with a variable replacement made if needed
     """
+    change = 1
 
-    val = str(determine_namespace_value(line_num, line, variable_name, local_namespace))
-    line = line[:i] + val + line[i + len(val):]
-    return line
+    if variable_name in local_namespace:
+        val = str(local_namespace[variable_name])
+        change += len(val)
+        line = line[:i] + val + line[i + len(val):]
+    return line, change
 
 
 def determine_evaluator(variable_type: str) -> EVAL_FUNC:
@@ -199,28 +204,14 @@ def determine_evaluator(variable_type: str) -> EVAL_FUNC:
             return str_eval
 
 
-def determine_namespace_value(line_num: int, line: str, variable_name: str, namespace: dict) -> str:
-    """
-    This will check if the variable exists in the namespace, either as a raw variable or as a function call
-    :param" variable_name: the name of the variable
-    :param namespace: namespace with all variable names
-    :return: string representation of the variable value
-    """
-    from binp_functions import call_function
-    if variable_name in namespace:
-        return namespace[variable_name]
+def replace_all_variables(vals: list[str], local_namespace: dict) -> list[str]:
 
-    if '(' in variable_name:
-        split_func = variable_name.split('(')
-        function_name = split_func[0]
+    from binp_functions import BinPFunction
+    print(f'taking in the following list:\n{vals}')
 
-        function_params = split_func[1][:-1]  # [-1] to remove the ) at the end
-        function_params = [f.strip() for f in function_params.split(',')]
+    for i, val in enumerate(vals):
+        if val in local_namespace and not isinstance(local_namespace[val], BinPFunction):
+            vals[i] = local_namespace[val]
 
-        while '' in function_params:
-            function_params.remove('')
-
-        val = call_function(line_num, line, function_name, function_params, namespace)
-        return val
-
-    return variable_name
+    print(f'returning the following list:\n{vals}')
+    return vals
