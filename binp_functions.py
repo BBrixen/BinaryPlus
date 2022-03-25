@@ -39,7 +39,7 @@ class BinPFunction:
         # modify the namespace with parameters passed in
         for i in range(len(self._params)):
             type_eval_func = determine_evaluator(self._params[i][0])
-            params[i] = type_eval_func(line_num, line, [params[i]], function_namespace)
+            params[i] = type_eval_func(line_num, line, params[i], function_namespace)
             function_namespace[self._params[i][1]] = params[i]
 
         end_line, function_return = run_program(self._lines, function_namespace)
@@ -153,12 +153,13 @@ def call_function(line_num: int, line: str, name: str, params: list[str], larger
     if name not in larger_namespace:
         raise BinPValueError(line_num, line, message=f"Unable to find function '{name}'")
 
-    while ',' in params:
-        params.remove(',')  # this expects there to be no commas
-
     for i in range(len(params)):  # this is needed we call a function on a line without any evaluation
         if params[i] in larger_namespace:
             params[i] = larger_namespace[params[i]]
+
+    params = [str(p) for p in params]
+    params = " ".join(params)
+    params = [p.strip().split() for p in params.split(',')]
 
     func: BinPFunction = larger_namespace[name]
     return func.run(line_num, line, params, larger_namespace.copy())
@@ -196,7 +197,7 @@ def parse_function_call(line_num: int, line: str, vals: list[str], namespace: di
         try:
             if vals[i] in namespace and isinstance(namespace[vals[i]], BinPFunction) and vals[i+1] == '(':
                 # if we have found a function name, and it has a parenthesis after it
-                function_params, end_i = parse_function_call(line_num, line, vals, namespace, index=i+2, depth=1)
+                function_params, end_i = parse_function_call(line_num, line, vals, namespace, index=i+2, depth=0)
 
                 # parsed the parameters recursively, now evaluate this function call
                 function_return = call_function(line_num, line, vals[i], function_params, namespace)
@@ -204,11 +205,15 @@ def parse_function_call(line_num: int, line: str, vals: list[str], namespace: di
                 i = end_i  # end_i is the index after we have evaluated this function,
                 # that way we don't parse over already-parsed data
 
+            elif vals[i] == '(':
+                depth += 1
             elif vals[i] == ')':  # reaching a ) means we closed out of the function call
                 if depth > 0:
-                    return parsed_vals, i
-                else:
                     parsed_vals.append(vals[i])
+                    depth -= 1
+                else:
+                    return parsed_vals, i
+
             else:
                 parsed_vals.append(vals[i])
         except IndexError:

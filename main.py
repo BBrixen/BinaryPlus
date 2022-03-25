@@ -136,7 +136,6 @@ def main() -> None:
     filename = 'test.binp'  # i have been using this for testing
 
     global_namespace = {}
-
     assert filename[-5:] == '.binp'
 
     try:
