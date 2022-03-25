@@ -89,6 +89,8 @@ def output(line_num: int, line: str, local_namespace: dict) -> None:
     for replacement in ADD_SPACES:
         line = line.replace(f' {replacement} ', replacement)
 
+    line = line.replace("'", "")
+
     print(f' >> {line}')
 
 
