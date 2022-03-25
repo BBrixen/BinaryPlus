@@ -184,7 +184,6 @@ def parse_function_call(line_num: int, line: str, vals: list[str], namespace: di
     :return: a list of values with function calls substituted in
             it also returns the index in the list where to continue parsing
     """
-
     i = index
     parsed_vals = []
     while i < len(vals):
@@ -200,6 +199,7 @@ def parse_function_call(line_num: int, line: str, vals: list[str], namespace: di
                 # that way we don't parse over already-parsed data
 
             elif vals[i] == '(':
+                parsed_vals.append(vals[i])
                 depth += 1  # increase depth counter by 1, so we don't exit from a function call too early
             elif vals[i] == ')':
                 if depth > 0:
