@@ -8,6 +8,7 @@ class BinPFunction:
 
     __init__: creates a function object which is a name, return type, parameters, and lines of program
     run: this is called to actually run the function
+    __str__: is only used for debug purposes
     """
     def __init__(self, name: str, return_type: str, params: list[(str, str)], lines: list[str]):
         self._name = name
@@ -16,6 +17,10 @@ class BinPFunction:
         self._lines = lines
 
     def __str__(self):
+        """
+        Used for debugging
+        :return: a string representation of this function
+        """
         return f'{self._name} takes {self._params} and returns {self._return_type}'
 
     def run(self, line_num: int, line: str, params: list, function_namespace: dict):
@@ -52,16 +57,6 @@ class BinPFunction:
         return_eval = determine_evaluator(self._return_type)
         return_val = return_eval(line_num, line, function_return, function_namespace)
         return return_val
-
-
-class FunctionTree:
-    def __init__(self, binp_function: BinPFunction, vals: list[str]):
-        self._function = binp_function
-        self._vals_to_parse = vals
-
-    def __repr__(self):
-        return f'{self._function}' \
-               f'we have these values: {self._vals_to_parse}'
 
 
 def create_function(line_num: int, lines: list[str], return_type: str, name: str,
@@ -157,8 +152,8 @@ def call_function(line_num: int, line: str, name: str, params: list[str], larger
         if params[i] in larger_namespace:
             params[i] = larger_namespace[params[i]]
 
-    params = [str(p) for p in params]
-    params = " ".join(params)
+    # formatting the parameters correctly (a list split by commas, each element is a list split by white space)
+    params = " ".join([str(p) for p in params])
     params = [p.strip().split() for p in params.split(',')]
 
     func: BinPFunction = larger_namespace[name]
@@ -189,7 +184,6 @@ def parse_function_call(line_num: int, line: str, vals: list[str], namespace: di
     :return: a list of values with function calls substituted in
             it also returns the index in the list where to continue parsing
     """
-    # TODO: implement depth so we can have (2+3) inside a function parameter
 
     i = index
     parsed_vals = []
@@ -206,13 +200,13 @@ def parse_function_call(line_num: int, line: str, vals: list[str], namespace: di
                 # that way we don't parse over already-parsed data
 
             elif vals[i] == '(':
-                depth += 1
-            elif vals[i] == ')':  # reaching a ) means we closed out of the function call
+                depth += 1  # increase depth counter by 1, so we don't exit from a function call too early
+            elif vals[i] == ')':
                 if depth > 0:
                     parsed_vals.append(vals[i])
-                    depth -= 1
+                    depth -= 1  # closing out of a () expression
                 else:
-                    return parsed_vals, i
+                    return parsed_vals, i  # closing out of a function
 
             else:
                 parsed_vals.append(vals[i])
