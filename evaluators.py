@@ -90,7 +90,7 @@ def bool_replacement(line_num: int, line: str, vals: list[str], local_namespace:
                 retval.append(True)
             case False | 'false' | 'False' | '0':
                 retval.append(False)
-            case '&&' | '||' | '!':
+            case '&&' | '||' | '!' | '(' | ')':
                 retval.append(val)
             case _:
                 raise BinPValueError(line_num, line, message="Invalid cast of type 'bool'")

@@ -1,8 +1,9 @@
 from errors import BinPSyntaxError
 from binp_functions import create_function, parse_function_call
 from evaluators import namespace_replacement, determine_evaluator
+from conditionals import handle_if
 
-ADD_SPACES = ['(', ')', '<', '>', '!', '&&', '||', '=', ',', '.', '-', '*', '+', '/']
+ADD_SPACES = ['(', ')', '<', '>', '!', '&&', '||', '=', ',', '.', '-', '*', '+', '/', '$']
 BEGIN_PRINT = " >> "
 
 
@@ -31,6 +32,10 @@ def parse_line(line_num: int, lines: list[str], local_namespace: dict) -> (dict,
 
         case ['var', *x]:  # variable assignment
             local_namespace, line_num = var_assign(x, line_num, lines, local_namespace)
+
+        case['if', *conditions]:
+            print('handling if')
+            handle_if(line_num, lines[line_num], conditions, local_namespace)
 
         case [func_name, '(', *params, ')']:  # function call
             parse_function_call(line_num, lines[line_num], [func_name, '(', *params, ')'], local_namespace)
@@ -144,7 +149,7 @@ def main() -> None:
     :return: the output for the program
     """
     # filename = input()
-    filename = 'test.binp'  # i have been using this for testing
+    filename = 'test.binp'  # I have been using this for testing
 
     global_namespace = {}
     assert filename[-5:] == '.binp'

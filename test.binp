@@ -14,14 +14,22 @@ $ and outer functions that are not part of the others all work
 var int y = x * add(x, add(add(1, 2), add(1, 1))) + (mul(x, (2+1)))
 output x * add(x, add(start, 2)) + mul(x, start) = y
 
-output 'input my name'
-var str name = input
-output my 'name' is name
+$output 'input my name'
+$var str name = input
+$output my 'name' is name
+$
+$output 'input my age'
+$var int age = input
+$output my 'age' is age
+$
+$output 'input true if i am cool, false otherwise'
+$var bool cool = input
+$output my 'cool' status is: cool
 
-output 'input my age'
-var int age = input
-output my 'age' is age
+var null func printSuccess = (bool status) =>
+output 'status is' status
+end printSuccess
 
-output 'input true if i am cool, false otherwise'
-var bool cool = input
-output my 'cool' status is: cool
+printSuccess(False)
+
+if (True) then printSuccess(True)
