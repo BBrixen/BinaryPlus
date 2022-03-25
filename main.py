@@ -3,6 +3,7 @@ from binp_functions import create_function, parse_function_call
 from evaluators import namespace_replacement, determine_evaluator
 
 ADD_SPACES = ['(', ')', '<', '>', '!', '&&', '||', '=', ',', '.', '-', '*', '+', '/']
+BEGIN_PRINT = " >> "
 
 
 def parse_line(line_num: int, lines: list[str], local_namespace: dict) -> (dict, int, list[str] | None):
@@ -64,6 +65,14 @@ def var_assign(statements: list[str], line_num: int, lines: list[str], local_nam
             # create function
             local_namespace[name], line_num = create_function(line_num, lines, return_type, name, params)
 
+        case [var_type, name, '=', 'input']:
+            raw_input = input(BEGIN_PRINT)  # use user input as the value
+            for replacement in ADD_SPACES:
+                raw_input = raw_input.replace(replacement, f' {replacement} ')
+
+            eval_func = determine_evaluator(var_type)
+            local_namespace[name] = eval_func(line_num, line[:-5] + raw_input, raw_input.split(), local_namespace)
+
         case [var_type, name, '=', *vals]:  # create type variable
             eval_func = determine_evaluator(var_type)
             local_namespace[name] = eval_func(line_num, line, vals, local_namespace)
@@ -91,7 +100,7 @@ def output(line_num: int, line: str, local_namespace: dict) -> None:
 
     line = line.replace("'", "")
 
-    print(f' >> {line}')
+    print(f'{BEGIN_PRINT}{line}')
 
 
 def run_program(lines: list[str], local_namespace: dict) -> (str, None | list[str]):
