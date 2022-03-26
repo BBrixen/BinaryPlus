@@ -55,8 +55,7 @@ class BinPFunction:
             return 'null'
 
         return_eval = determine_evaluator(self._return_type)
-        return_val = return_eval(line_num, line, function_return, function_namespace)
-        return return_val
+        return return_eval(line_num, line, function_return, function_namespace)
 
 
 def create_function(line_num: int, lines: list[str], return_type: str, name: str,
@@ -130,38 +129,37 @@ def parse_function_lines(line_num: int, lines: list[str], name: str) -> (list[st
     return lines[line_num+1:end_line], end_line
 
 
-def call_function(line_num: int, line: str, name: str, params: list[str], larger_namespace: dict):
+def call_function(line_num: int, line: str, name: str, params: list[str], namespace: dict) -> dict:
     """
     This serves as a middle ground between actually running the function.
     This needs to parse the information from running into usable information in the run function
 
     This may be called by namespace_replacement to substitute in the function value
-
-    :param line_num: the line number for the function call
+    :param line_num: the number of this current line
     :param line: the line which calls the function
     :param name: the name of the function being called (to search for in namespace)
     :param params: the parameters passed into the function
-    :param larger_namespace: the larger_namespace which should not be modified by the function call
+    :param namespace: the larger_namespace which should not be modified by the function call
             (besides storing return values)
     :return: the value which the function returns
     """
-    if name not in larger_namespace:
+    if name not in namespace:
         raise BinPValueError(line_num, line, message=f"Unable to find function '{name}'")
 
     for i in range(len(params)):  # this is needed we call a function on a line without any evaluation
-        if params[i] in larger_namespace:
-            params[i] = larger_namespace[params[i]]
+        if params[i] in namespace:
+            params[i] = namespace[params[i]]
 
     # formatting the parameters correctly (a list split by commas, each element is a list split by white space)
     params = " ".join([str(p) for p in params])
     params = [p.strip().split() for p in params.split(',')]
 
-    func: BinPFunction = larger_namespace[name]
-    return func.run(line_num, line, params, larger_namespace.copy())
+    func: BinPFunction = namespace[name]
+    return func.run(line_num, line, params, namespace)
 
 
 def parse_function_call(line_num: int, line: str, vals: list[str], namespace: dict,
-                        index=0, depth=0) -> (list[str], int):
+                        index=0, depth=0) -> (list[str], int, dict):
     """
     This takes a list of values and recursively parses it into smaller
     function calls until we are at a base case.
@@ -173,7 +171,6 @@ def parse_function_call(line_num: int, line: str, vals: list[str], namespace: di
     call is replaced with its return value. This can then be stored as
     a parameter, or evaluated as a parameter in another function call
     (hence the recursive nature)
-
     :param line_num: the line number of the function parsing
     :param line: which line we are on for error printing
     :param vals: the values to parse for this current call
@@ -184,16 +181,19 @@ def parse_function_call(line_num: int, line: str, vals: list[str], namespace: di
     :return: a list of values with function calls substituted in
             it also returns the index in the list where to continue parsing
     """
+    new_namespace = namespace.copy()
+
     i = index
     parsed_vals = []
     while i < len(vals):
         try:
-            if vals[i] in namespace and isinstance(namespace[vals[i]], BinPFunction) and vals[i+1] == '(':
+            if vals[i] in new_namespace and isinstance(namespace[vals[i]], BinPFunction) and vals[i+1] == '(':
                 # if we have found a function name, and it has a parenthesis after it
-                function_params, end_i = parse_function_call(line_num, line, vals, namespace, index=i+2, depth=0)
+                function_params, end_i, new_namespace = \
+                    parse_function_call(line_num, line, vals, namespace, index=i+2, depth=0)
 
                 # parsed the parameters recursively, now evaluate this function call
-                function_return = call_function(line_num, line, vals[i], function_params, namespace)
+                function_return = call_function(line_num, line, vals[i], function_params, new_namespace)
                 parsed_vals.append(function_return)
                 i = end_i  # end_i is the index after we have evaluated this function,
                 # that way we don't parse over already-parsed data
@@ -206,7 +206,7 @@ def parse_function_call(line_num: int, line: str, vals: list[str], namespace: di
                     parsed_vals.append(vals[i])
                     depth -= 1  # closing out of a () expression
                 else:
-                    return parsed_vals, i  # closing out of a function
+                    return parsed_vals, i, new_namespace  # closing out of a function
 
             else:
                 parsed_vals.append(vals[i])
@@ -215,4 +215,4 @@ def parse_function_call(line_num: int, line: str, vals: list[str], namespace: di
 
         i += 1
 
-    return parsed_vals, len(vals)
+    return parsed_vals, len(vals), new_namespace

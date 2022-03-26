@@ -107,16 +107,27 @@ def str_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) -
     :param local_namespace: the namespace for checking any variables
     :return: the string result of calculating everything in vals
     """
-    after_assignment = "".join(line.split('=')[1:])
-    return namespace_replacement(line_num, after_assignment, local_namespace)[2:]  # 2: to remove spaces at start
+    start, end = 0, len(line)
+    first_elem = vals[0]
+    while start < len(line):
+        if line[start:start+len(first_elem)] == first_elem:
+            break
+        start += 1
+
+    last_elem = vals[len(vals)-1]
+    while end > 0:
+        if line[end-len(last_elem):end] == last_elem:
+            break
+        end -= 1
+
+    return namespace_replacement(line[start-1:end], local_namespace)[1:]  # 1: to remove space at start
 
 
-def namespace_replacement(line_num: int, line: str, local_namespace: dict) -> str:
+def namespace_replacement(line: str, local_namespace: dict) -> str:
     # TODO: add support of tuple indexing in namespace search, this can be done in its own method
     """
     This nifty little function searches through a line and replaces every valid mention of a variable
     with its value inside the namespace
-    :param line_num: the number of this line
     :param line: the raw line possibly containing variable names
     :param local_namespace: the namespace with variable names and values
     :return: the new line with variable names substituted with values
@@ -136,9 +147,8 @@ def namespace_replacement(line_num: int, line: str, local_namespace: dict) -> st
             continue
 
         current_variable, new_i = find_variable_name(line, i)
-        line, i_change = replace_variable(line_num, line, i, current_variable, local_namespace)
+        line, i_change = replace_variable(line, i, current_variable, local_namespace)
         i = new_i + i_change
-
     return line
 
 
@@ -161,11 +171,10 @@ def find_variable_name(line: str, i: int) -> (str, int):
     return current_variable, i
 
 
-def replace_variable(line_num: int, line: str, i: int, variable_name: str, local_namespace: dict) -> (str, int):
+def replace_variable(line: str, i: int, variable_name: str, local_namespace: dict) -> (str, int):
     """
     This replaces a possible variable name with its value in the namespace.
     it edits the line which contains the variable
-    :param line_num: the number for this line of code
     :param line: the line which might contain the variable
     :param i: index of where the possible variable is located
     :param variable_name: string of either normal text or a variable which needs to be replaced
@@ -173,7 +182,7 @@ def replace_variable(line_num: int, line: str, i: int, variable_name: str, local
     :return: the line with a variable replacement made if needed
     """
     from binp_functions import BinPFunction
-    change = 1
+    change = 0
 
     if variable_name in local_namespace and not isinstance(local_namespace[variable_name], BinPFunction):
         val = str(local_namespace[variable_name])
@@ -224,6 +233,6 @@ def replace_all_variables(line_num: int, line: str, vals: list[str], local_names
         if val in local_namespace and not isinstance(local_namespace[val], BinPFunction):
             vals[i] = local_namespace[val]
 
-    vals, i = parse_function_call(line_num, line, vals, local_namespace)
+    vals, i, copied_namespace = parse_function_call(line_num, line, vals, local_namespace)
 
     return vals

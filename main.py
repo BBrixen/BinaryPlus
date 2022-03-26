@@ -28,14 +28,13 @@ def parse_line(line_num: int, lines: list[str], local_namespace: dict) -> (dict,
             pass  # skip comments
 
         case ['output', *_]:  # output a value
-            output(line_num, lines[line_num][7:], local_namespace)
+            output(lines[line_num][7:], local_namespace)
 
         case ['var', *x]:  # variable assignment
             local_namespace, line_num = var_assign(x, line_num, lines, local_namespace)
 
         case['if', *conditions]:
-            print('handling if')
-            handle_if(line_num, lines[line_num], conditions, local_namespace)
+            local_namespace = handle_if(line_num, lines[line_num], conditions, local_namespace)
 
         case [func_name, '(', *params, ')']:  # function call
             parse_function_call(line_num, lines[line_num], [func_name, '(', *params, ')'], local_namespace)
@@ -88,18 +87,17 @@ def var_assign(statements: list[str], line_num: int, lines: list[str], local_nam
     return local_namespace, line_num
 
 
-def output(line_num: int, line: str, local_namespace: dict) -> None:
+def output(line: str, local_namespace: dict) -> None:
     """
     This searches through the output message and replaces any instances of a
     variable with its value.it does not replace variables surrounded with "" or ''
-    :param line_num: the number of this line
     :param line: the line to be searched. this can contain normal strings and
             variable references
     :param local_namespace: the namespace with every variable and its value
     :return: prints out the line to the console
     """
 
-    line = namespace_replacement(line_num, line, local_namespace)
+    line = namespace_replacement(line, local_namespace)
     for replacement in ADD_SPACES:
         line = line.replace(f' {replacement} ', replacement)
 
@@ -121,6 +119,8 @@ def run_program(lines: list[str], local_namespace: dict) -> (str, None | list[st
         if retval is not None:  # we got a return value from this function, so we need to pass on the return
             return lines[line_num], retval
 
+    if not lines:
+        return [], None
     return lines[line_num-1], None  # return none since there was no return in this section
 
 

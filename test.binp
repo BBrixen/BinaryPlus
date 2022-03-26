@@ -1,35 +1,20 @@
-var int func add = (int x, int y) =>
-    return x+y
-end add
+output enter number for x
+var int x = input
+output enter number for y
+var int y = input
+output the values before are x y
 
-var int func mul = (int x, int y) =>
-    return x * y
-end mul
+var null func swap1 = (int x, int y) =>
+    var int temp = x
+    var int x = y
+    var int y = temp
+end swap1
 
-var int start = 3
-var int x = 5 + 6 - (2*3)
+$ this uses the names of the swap function to bind these to different values
+var null func swap2 = (int x, int y) =>
+end swap2
 
-$ functions within functions
-$ and outer functions that are not part of the others all work
-var int y = x * add(x, add(add(1, 2), add(1, 1))) + (mul(x, (2+1)))
-output x * add(x, add(start, 2)) + mul(x, start) = y
-
-$output 'input my name'
-$var str name = input
-$output my 'name' is name
-$
-$output 'input my age'
-$var int age = input
-$output my 'age' is age
-$
-$output 'input true if i am cool, false otherwise'
-$var bool cool = input
-$output my 'cool' status is: cool
-
-var null func printSuccess = (bool status) =>
-output 'status is' status
-end printSuccess
-
-printSuccess(False)
-
-if (True) then printSuccess(True)
+if (True) then swap1 (x, y)
+output the values in the middle are x y
+if (True) then swap2(y, x)
+output the values after are x y
