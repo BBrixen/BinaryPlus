@@ -1,1 +1,16 @@
+var null func print = (str name) =>
+output hello, name
+end print
 
+var bool condition1 = True
+var bool condition2 = True
+
+if (True) then
+output 1
+else
+    if (False) then
+    output 2
+    else
+    output 3
+    end
+end

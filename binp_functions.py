@@ -36,7 +36,7 @@ class BinPFunction:
         from main import run_program  # we put this inside the function to avoid an import loop
 
         # make sure the parameters passed are the correct length
-        if len(params) != len(self._params):
+        if len(params) != len(self._params) and (self._params == [] and params != [[]]):
             print(f'expected {self._params}')
             print(f'got {params}')
             raise BinPArgumentError(line_num, line, message=f"Incorrect number of arguments in {self._name} call")

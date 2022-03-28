@@ -1,9 +1,7 @@
-from errors import BinPSyntaxError
 from evaluators import bool_eval
-from binp_functions import parse_function_call
 
 
-def handle_if(line_num: int, line: str, conditions: list[str], namespace: dict) -> dict:
+def handle_if(line_num: int, lines: list[str], conditions: list[str], namespace: dict) -> (dict, int, list[str]):
     """
     This is called when the user calls an if statement. The format is one of the following
     if (condition) then if_function
@@ -11,38 +9,41 @@ def handle_if(line_num: int, line: str, conditions: list[str], namespace: dict) 
     This will run which ever function is valid for the given condition
 
     :param line_num: the line number of this if statement, for error printing
-    :param line: the line of this if statement, for error printing
+    :param lines: the lines of the program, used for traversing the if statement
     :param conditions: the list of all commands for this if, including the condition and the functions
     :param namespace: the namespace containing the functions which should be called
     :return: the modified namespace after the proper function has been called
     """
-    # split it up into (condition) | functions
-    joined_condition = " ".join(conditions)
-    split_by_then = joined_condition.split(' then ')
-    if len(split_by_then) != 2:
-        raise BinPSyntaxError(line_num, line, message="Must have exactly 1 'then' statement in a conditional")
+    bool_condition = bool_eval(line_num, lines[line_num], conditions, namespace)
+    return run_condition(line_num + 1, lines, bool_condition, namespace)
 
-    bool_condition = split_by_then[0].split()  # split by spaces again, since we joined back together previously
-    if bool_condition[0] != '(' or bool_condition[-1] != ')':
-        raise BinPSyntaxError(line_num, line, message="Condition must be wrapped in parenthesis")
 
-    # parse if there are a valid number of else statements
-    functions = split_by_then[1].split(' else ')
-    if len(functions) > 2:
-        raise BinPSyntaxError(line_num, line, message="Must have 0-1 'else' statements in conditional")
+def handle_while(line_num: int, lines: list[str], conditions: list[str], namespace: dict) -> (dict, int, list[str]):
+    line_of_while = line_num - 1  # -1 because we will add one after this is called. but we want to stay on this loop
+    bool_condition = bool_eval(line_num, lines[line_num], conditions, namespace)
+    namespace, line_num, retval = run_condition(line_num + 1, lines, bool_condition, namespace)
 
-    # evaluate the binary condition
-    bool_condition = bool_condition[1:-1]
-    bool_condition = bool_eval(line_num, line, bool_condition, namespace)
+    if retval is not None or not bool_condition:
+        return namespace, line_num, retval  # set this to the end of the loop
 
-    if bool_condition:  # run if
-        if_function = functions[0].split()
-        temp_val, temp_i, namespace = parse_function_call(line_num, line, if_function, namespace)
+    return namespace, line_of_while, retval
 
-    else:  # run else
-        if len(functions) != 2:
-            return namespace  # check if else exists or not
-        else_function = functions[1].split()
-        temp_val, temp_i, namespace = parse_function_call(line_num, line, else_function, namespace)
 
-    return namespace
+def run_condition(line_num: int, lines: list[str], condition: bool, namespace: dict) -> (dict, int, list[str]):
+    from main import parse_line
+
+    while line_num < len(lines):
+        first_elem = lines[line_num].split()[0]
+        match first_elem:
+            case 'end':
+                return namespace, line_num, None
+            case 'else':
+                condition = not condition
+                line_num += 1
+            case _:
+                if condition:
+                    namespace, line_num, retval = parse_line(line_num, lines, namespace)
+                    if retval is not None:  # we got a return from a function so we need to pass it on
+                        return namespace, line_num, retval
+                else:
+                    line_num += 1  # otherwise, keep moving on

@@ -1,7 +1,7 @@
 from errors import BinPSyntaxError
 from binp_functions import create_function, parse_function_call
 from evaluators import namespace_replacement, determine_evaluator
-from conditionals import handle_if
+from conditionals import handle_if, handle_while
 
 ADD_SPACES = ['(', ')', '<', '>', '!', '&&', '||', '=', ',', '.', '-', '*', '+', '/', '$']
 BEGIN_PRINT = " >> "
@@ -21,6 +21,8 @@ def parse_line(line_num: int, lines: list[str], local_namespace: dict) -> (dict,
             within a function call
     :return: the new namespace with added variables
     """
+    retval = None
+
     match lines[line_num].split():
         case []:
             pass  # skip blank lines
@@ -33,20 +35,23 @@ def parse_line(line_num: int, lines: list[str], local_namespace: dict) -> (dict,
         case ['var', *x]:  # variable assignment
             local_namespace, line_num = var_assign(x, line_num, lines, local_namespace)
 
-        case['if', *conditions]:
-            local_namespace = handle_if(line_num, lines[line_num], conditions, local_namespace)
+        case['if', '(', *conditions, ')', 'then']:  # if statement
+            local_namespace, line_num, retval = handle_if(line_num, lines, conditions, local_namespace)
+
+        case ['while', '(', *conditions, ')', 'then']:  # while loop
+            local_namespace, line_num, retval = handle_while(line_num, lines, conditions, local_namespace)
 
         case [func_name, '(', *params, ')']:  # function call
             parse_function_call(line_num, lines[line_num], [func_name, '(', *params, ')'], local_namespace)
 
         case ['return', *vals]:  # returning a value
-            return None, line_num, vals
+            return None, line_num, vals  # TODO: might need to make this return local_namespace
 
         case default:
             raise BinPSyntaxError(line_num, default)
 
-    new_line = line_num + 1  # by default, we only move 1 line at a time
-    return local_namespace, new_line, None  # return none when there are no return values to pass up
+    line_num += 1
+    return local_namespace, line_num, retval  # return none when there are no return values to pass up
 
 
 def var_assign(statements: list[str], line_num: int, lines: list[str], local_namespace: dict) -> (dict, int):
