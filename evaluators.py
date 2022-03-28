@@ -132,63 +132,10 @@ def namespace_replacement(line: str, local_namespace: dict) -> str:
     :param local_namespace: the namespace with variable names and values
     :return: the new line with variable names substituted with values
     """
-    i = 0
-    ignoring: bool = False  # used to ignore quoted sections
-    while i < len(line):
-
-        match line[i]:
-            case ' ':  # don't count spaces
-                i += 1
-                continue
-            case "'":  # this starts and ends quoted sections
-                ignoring = not ignoring
-        if ignoring:
-            i += 1  # if it is quoted, then skip replacing it
-            continue
-
-        current_variable, new_i = find_variable_name(line, i)
-        line, i_change = replace_variable(line, i, current_variable, local_namespace)
-        i = new_i + i_change
+    line = " " + line + " "
+    for var in local_namespace:
+        line = line.replace(f' {var} ', f' {local_namespace[var]} ')
     return line
-
-
-def find_variable_name(line: str, i: int) -> (str, int):
-    """
-    We need to manually search for the next occurrence of a space, building a variable as we traverse
-    :param line: the line to search
-    :param i: current starting index which will construct a new variable
-    :return: int with the new index after reaching a space, and a string with the variable name we found
-    """
-    current_variable: str = line[i]
-    i += 1
-
-    while i < len(line):  # manually split by spaces
-        if line[i] == ' ':
-            break
-        current_variable += line[i]
-        i += 1
-
-    return current_variable, i
-
-
-def replace_variable(line: str, i: int, variable_name: str, local_namespace: dict) -> (str, int):
-    """
-    This replaces a possible variable name with its value in the namespace.
-    it edits the line which contains the variable
-    :param line: the line which might contain the variable
-    :param i: index of where the possible variable is located
-    :param variable_name: string of either normal text or a variable which needs to be replaced
-    :param local_namespace: namespace with variable names and values
-    :return: the line with a variable replacement made if needed
-    """
-    from binp_functions import BinPFunction
-    change = 0
-
-    if variable_name in local_namespace and not isinstance(local_namespace[variable_name], BinPFunction):
-        val = str(local_namespace[variable_name])
-        change += len(val)
-        line = line[:i] + val + line[i + len(variable_name):]
-    return line, change
 
 
 def determine_evaluator(variable_type: str) -> EVAL_FUNC:

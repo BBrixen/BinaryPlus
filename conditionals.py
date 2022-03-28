@@ -54,7 +54,7 @@ def handle_while(line_num: int, lines: list[str], conditions: list[str], namespa
     :param namespace: the namespace which will be edited in this while loop
     :param execute: if this is false, do not actually execute anything inside the while loop
     :return: this returns the modified namespace, along with the line number to go to next after this finishes
-            it can also pass return values out of a function (UNTESTED)
+            it can also pass return values out of a function
     """
     line_of_while = line_num - 1  # -1 because we will add one after this is called. but we want to stay on this loop
     bool_condition = bool_eval(line_num, lines[line_num], conditions, namespace)

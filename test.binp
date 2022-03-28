@@ -5,9 +5,21 @@ end print
 var bool condition1 = True
 
 while (condition1) then
-    output 'input 0 to terminate'
+    output 'input 1 to terminate'
     var bool condition1 = input
-    output condition1
+
+    var bool func swapCond = (bool x) =>
+        if (x) then
+            return False
+        else
+            return True
+        end
+    end swapCond
+
+    output swapping condition1
+    var bool condition1 = swapCond(condition1)
+    output swapped to condition1
+    output
 
     else
     output this is the last loop

@@ -4,7 +4,7 @@ from evaluators import namespace_replacement, determine_evaluator
 from conditionals import handle_if, handle_while
 
 ADD_SPACES = ['(', ')', '<', '>', '!', '&&', '||', '=', ',', '.', '-', '*', '+', '/', '$']
-BEGIN_PRINT = " >> "
+BEGIN_PRINT = " >>"
 
 
 def parse_line(line_num: int, lines: list[str], local_namespace: dict, execute=True) -> (dict, int, list[str] | None):
@@ -87,7 +87,7 @@ def var_assign(statements: list[str], line_num: int, lines: list[str], local_nam
 
         case [var_type, name, '=', 'input']:
             if execute:
-                raw_input = input(BEGIN_PRINT)  # use user input as the value
+                raw_input = input(BEGIN_PRINT+" ")  # use user input as the value
                 for replacement in ADD_SPACES:
                     raw_input = raw_input.replace(replacement, f' {replacement} ')
 
