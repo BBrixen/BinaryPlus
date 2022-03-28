@@ -7,7 +7,7 @@ ADD_SPACES = ['(', ')', '<', '>', '!', '&&', '||', '=', ',', '.', '-', '*', '+',
 BEGIN_PRINT = " >> "
 
 
-def parse_line(line_num: int, lines: list[str], local_namespace: dict) -> (dict, int, list[str] | None):
+def parse_line(line_num: int, lines: list[str], local_namespace: dict, execute=True) -> (dict, int, list[str] | None):
     """
     This is the highest level for parsing input. it handles:
         comments, output, variable assignment, if statements, while loops
@@ -19,6 +19,8 @@ def parse_line(line_num: int, lines: list[str], local_namespace: dict) -> (dict,
     :param local_namespace: namespace of the current line being run.
             this can be the global namespace or a copied namespace
             within a function call
+    :param execute: if this is false, we do not want to execute this line of code,
+            rather just act like we did, and move the line_number along accordingly
     :return: the new namespace with added variables
     """
     retval = None
@@ -30,22 +32,25 @@ def parse_line(line_num: int, lines: list[str], local_namespace: dict) -> (dict,
             pass  # skip comments
 
         case ['output', *_]:  # output a value
-            output(lines[line_num][7:], local_namespace)
+            if execute:
+                output(lines[line_num][7:], local_namespace)
 
         case ['var', *x]:  # variable assignment
-            local_namespace, line_num = var_assign(x, line_num, lines, local_namespace)
+            local_namespace, line_num = var_assign(x, line_num, lines, local_namespace, execute=execute)
 
         case['if', '(', *conditions, ')', 'then']:  # if statement
-            local_namespace, line_num, retval = handle_if(line_num, lines, conditions, local_namespace)
+            local_namespace, line_num, retval = handle_if(line_num, lines, conditions, local_namespace, execute=execute)
 
         case ['while', '(', *conditions, ')', 'then']:  # while loop
-            local_namespace, line_num, retval = handle_while(line_num, lines, conditions, local_namespace)
+            local_namespace, line_num, retval = handle_while(line_num, lines, conditions, local_namespace, execute=execute)
 
         case [func_name, '(', *params, ')']:  # function call
-            parse_function_call(line_num, lines[line_num], [func_name, '(', *params, ')'], local_namespace)
+            if execute:
+                parse_function_call(line_num, lines[line_num], [func_name, '(', *params, ')'], local_namespace)
 
         case ['return', *vals]:  # returning a value
-            return None, line_num, vals  # TODO: might need to make this return local_namespace
+            if execute:
+                return None, line_num, vals  # TODO: might need to make this return local_namespace
 
         case default:
             raise BinPSyntaxError(line_num, default)
@@ -54,7 +59,8 @@ def parse_line(line_num: int, lines: list[str], local_namespace: dict) -> (dict,
     return local_namespace, line_num, retval  # return none when there are no return values to pass up
 
 
-def var_assign(statements: list[str], line_num: int, lines: list[str], local_namespace: dict) -> (dict, int):
+def var_assign(statements: list[str], line_num: int, lines: list[str], local_namespace: dict,
+               execute=True) -> (dict, int):
     """
     This handles a variable assignment statement
     it has the form
@@ -72,7 +78,7 @@ def var_assign(statements: list[str], line_num: int, lines: list[str], local_nam
     match statements:
         case [return_type, 'func', name, '=', '(', *params, ')', '=', '>']:  # function declaration
             # create function
-            local_namespace[name], line_num = create_function(line_num, lines, return_type, name, params)
+            new_variable, line_num = create_function(line_num, lines, return_type, name, params)
 
         case [var_type, name, '=', 'input']:
             raw_input = input(BEGIN_PRINT)  # use user input as the value
@@ -80,15 +86,17 @@ def var_assign(statements: list[str], line_num: int, lines: list[str], local_nam
                 raw_input = raw_input.replace(replacement, f' {replacement} ')
 
             eval_func = determine_evaluator(var_type)
-            local_namespace[name] = eval_func(line_num, line[:-5] + raw_input, raw_input.split(), local_namespace)
+            new_variable = eval_func(line_num, line[:-5] + raw_input, raw_input.split(), local_namespace)
 
         case [var_type, name, '=', *vals]:  # create type variable
             eval_func = determine_evaluator(var_type)
-            local_namespace[name] = eval_func(line_num, line, vals, local_namespace)
+            new_variable = eval_func(line_num, line, vals, local_namespace)
 
         case _:
             raise BinPSyntaxError(line_num, line, message="Invalid variable assignment")
 
+    if execute:
+        local_namespace[name] = new_variable
     return local_namespace, line_num
 
 
