@@ -39,10 +39,12 @@ def parse_line(line_num: int, lines: list[str], local_namespace: dict, execute=T
             local_namespace, line_num = var_assign(x, line_num, lines, local_namespace, execute=execute)
 
         case['if', '(', *conditions, ')', 'then']:  # if statement
-            local_namespace, line_num, retval = handle_if(line_num, lines, conditions, local_namespace, execute=execute)
+            local_namespace, line_num, retval = handle_if(line_num, lines, conditions,
+                                                          local_namespace, execute=execute)
 
         case ['while', '(', *conditions, ')', 'then']:  # while loop
-            local_namespace, line_num, retval = handle_while(line_num, lines, conditions, local_namespace, execute=execute)
+            local_namespace, line_num, retval = handle_while(line_num, lines, conditions,
+                                                             local_namespace, execute=execute)
 
         case [func_name, '(', *params, ')']:  # function call
             if execute:
@@ -71,6 +73,8 @@ def var_assign(statements: list[str], line_num: int, lines: list[str], local_nam
     :param line_num: the line number for error messages
     :param lines: all the lines of this section of code
     :param local_namespace: the namespace which will be updates with the new variable
+    :param execute: if this is false, we do not actually create the variable,
+            but rather we act like we created it for keeping track of the line number
     :return: the new namespace with this variable added
     """
     line = lines[line_num]

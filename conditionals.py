@@ -24,6 +24,19 @@ def handle_if(line_num: int, lines: list[str], conditions: list[str], namespace:
 
 def handle_while(line_num: int, lines: list[str], conditions: list[str], namespace: dict,
                  execute=True) -> (dict, int, list[str]):
+    """
+    This creates a while loop. it is essentially the same as an if statement,
+    except instead of going to the end of the if statement,
+    it will instead tell the program to go back to the beginning of the while loop
+    and start again. if the condition if false it will skip the entire while loop
+    :param line_num: the line number for the start of the while loop
+    :param lines: this is needed to parse through what is in the while loop
+    :param conditions: the condition for the while loop to run
+    :param namespace: the namespace which will be edited in this while loop
+    :param execute: if this is false, do not actually execute anything inside the while loop
+    :return: this returns the modified namespace, along with the line number to go to next after this finishes
+            it can also pass return values out of a function (UNTESTED)
+    """
     line_of_while = line_num - 1  # -1 because we will add one after this is called. but we want to stay on this loop
     bool_condition = bool_eval(line_num, lines[line_num], conditions, namespace)
     namespace, line_num, retval = run_condition(line_num + 1, lines, bool_condition, namespace, execute=execute)
@@ -36,6 +49,22 @@ def handle_while(line_num: int, lines: list[str], conditions: list[str], namespa
 
 def run_condition(line_num: int, lines: list[str], condition: bool, namespace: dict,
                   execute=True) -> (dict, int, list[str]):
+    """
+    This runs through a conditional (if or while) and executes the code if it can
+    It handles the end of the conditonal, as well as any else blocks within it
+
+    :param line_num: the line number for the first line of code after if/while starts
+    :param lines: the lines of the program to loop over
+    :param condition: the condition as an evaluated boolean
+    :param namespace: the namespace which is used when running lines of code
+    :param execute: if this is false, pass its false values onto the parse_line
+            so that nothing in this section gets executed.
+            we do 'condition and execute' because if either one of them is false,
+            the specific line of code being parsed should not be executed
+    :return: the namespace after the lines have been run,
+            as well as the line number of the end of this conditional,
+            and a retval if something was returned from this conditional
+    """
     from main import parse_line
     if_statement_line_num = line_num
 
