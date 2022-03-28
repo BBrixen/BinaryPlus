@@ -3,18 +3,14 @@ output hello, name
 end print
 
 var bool condition1 = True
-var bool condition2 = True
 
-if (condition1) then
-    if (condition2) then
-        output condition1 and condition2 is this
+while (condition1) then
+    output 'input 0 to terminate'
+    var bool condition1 = input
+    output condition1
+
     else
-        output condition1 and condition2 is this
-    end
-else
-    if (condition2) then
-        output condition1 and condition2 is this
-    else
-        output condition1 and condition2 is this
-    end
+    output this is the last loop
 end
+
+output 'terminated'

@@ -6,8 +6,15 @@ def handle_if(line_num: int, lines: list[str], conditions: list[str], namespace:
               execute=True) -> (dict, int, list[str]):
     """
     This is called when the user calls an if statement. The format is one of the following
-    if (condition) then if_function
-    if (condition) then if_function else else_function
+    if ([condition]) then
+    [...]
+    end
+
+    if ([condition]) then
+    [...]
+    else
+    [...]
+    end
     This will run which ever function is valid for the given condition
 
     :param line_num: the line number of this if statement, for error printing
@@ -18,8 +25,7 @@ def handle_if(line_num: int, lines: list[str], conditions: list[str], namespace:
     :return: the modified namespace after the proper function has been called
     """
     bool_condition = bool_eval(line_num, lines[line_num], conditions, namespace)
-    namespace, new_num, retval = run_condition(line_num + 1, lines, bool_condition, namespace, execute=execute)
-    return namespace, new_num, retval
+    return run_condition(line_num + 1, lines, bool_condition, namespace, execute=execute)
 
 
 def handle_while(line_num: int, lines: list[str], conditions: list[str], namespace: dict,
@@ -29,6 +35,19 @@ def handle_while(line_num: int, lines: list[str], conditions: list[str], namespa
     except instead of going to the end of the if statement,
     it will instead tell the program to go back to the beginning of the while loop
     and start again. if the condition if false it will skip the entire while loop
+
+    You can also provide an else statement which will execute once when the condition is false
+
+    while ([condition]) then
+    [...]
+    end
+
+    while ([condition]) then
+    [...]
+    else
+    [...]
+    end
+
     :param line_num: the line number for the start of the while loop
     :param lines: this is needed to parse through what is in the while loop
     :param conditions: the condition for the while loop to run
@@ -51,7 +70,7 @@ def run_condition(line_num: int, lines: list[str], condition: bool, namespace: d
                   execute=True) -> (dict, int, list[str]):
     """
     This runs through a conditional (if or while) and executes the code if it can
-    It handles the end of the conditonal, as well as any else blocks within it
+    It handles the end of the conditional, as well as any else blocks within it
 
     :param line_num: the line number for the first line of code after if/while starts
     :param lines: the lines of the program to loop over
@@ -66,16 +85,19 @@ def run_condition(line_num: int, lines: list[str], condition: bool, namespace: d
             and a retval if something was returned from this conditional
     """
     from main import parse_line
-    if_statement_line_num = line_num
 
+    if_statement_line_num = line_num  # stored for error printing later
     while line_num < len(lines):
+        if lines[line_num] == '':
+            line_num += 1
+            continue
         first_elem = lines[line_num].split()[0]
 
         match first_elem:
             case 'end':
                 return namespace, line_num, None
             case 'else':
-                condition = not condition
+                condition = not condition  # toggle condition, since we do either if or else (never both/neither)
                 line_num += 1
             case _:
                 namespace, line_num, retval = parse_line(line_num, lines, namespace,

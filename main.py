@@ -78,6 +78,7 @@ def var_assign(statements: list[str], line_num: int, lines: list[str], local_nam
     :return: the new namespace with this variable added
     """
     line = lines[line_num]
+    new_variable = None
 
     match statements:
         case [return_type, 'func', name, '=', '(', *params, ')', '=', '>']:  # function declaration
@@ -85,12 +86,13 @@ def var_assign(statements: list[str], line_num: int, lines: list[str], local_nam
             new_variable, line_num = create_function(line_num, lines, return_type, name, params)
 
         case [var_type, name, '=', 'input']:
-            raw_input = input(BEGIN_PRINT)  # use user input as the value
-            for replacement in ADD_SPACES:
-                raw_input = raw_input.replace(replacement, f' {replacement} ')
+            if execute:
+                raw_input = input(BEGIN_PRINT)  # use user input as the value
+                for replacement in ADD_SPACES:
+                    raw_input = raw_input.replace(replacement, f' {replacement} ')
 
-            eval_func = determine_evaluator(var_type)
-            new_variable = eval_func(line_num, line[:-5] + raw_input, raw_input.split(), local_namespace)
+                eval_func = determine_evaluator(var_type)
+                new_variable = eval_func(line_num, line[:-5] + raw_input, raw_input.split(), local_namespace)
 
         case [var_type, name, '=', *vals]:  # create type variable
             eval_func = determine_evaluator(var_type)
@@ -99,7 +101,7 @@ def var_assign(statements: list[str], line_num: int, lines: list[str], local_nam
         case _:
             raise BinPSyntaxError(line_num, line, message="Invalid variable assignment")
 
-    if execute:
+    if execute and new_variable is not None:
         local_namespace[name] = new_variable
     return local_namespace, line_num
 
