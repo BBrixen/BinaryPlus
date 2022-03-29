@@ -1,28 +1,25 @@
-var null func print = (str name) =>
-output hello, name
-end print
+var bool condition = True
 
-var bool condition1 = True
-
-while (condition1) then
+while (condition) =>
     output 'input 1 to terminate'
-    var bool condition1 = input
+    var bool condition = input
 
     var bool func swapCond = (bool x) =>
-        if (x) then
+        if (x) =>
             return False
-        else
+        else =>
             return True
         end
     end swapCond
 
-    output swapping condition1
-    var bool condition1 = swapCond(condition1)
-    output swapped to condition1
+    output swapping condition
+    var bool condition = swapCond(condition)
+    output swapped to condition
     output
 
-    else
-    output this is the last loop
+    $ the => after else is not actually enforced, yet
+    else =>
+        output this is the last loop
 end
 
 output 'terminated'

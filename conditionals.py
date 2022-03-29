@@ -93,7 +93,7 @@ def run_condition(line_num: int, lines: list[str], condition: bool, namespace: d
             continue
         first_elem = lines[line_num].split()[0]
 
-        match first_elem:
+        match first_elem:  # check the start of the line for end/else
             case 'end':
                 return namespace, line_num, None
             case 'else':

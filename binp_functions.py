@@ -6,6 +6,17 @@ class BinPFunction:
     """
     This class represents a function which is callable
 
+    they have the following syntax:
+    var [type] func [name] = ([type name, type name...]) =>
+    [...]
+    end [name]
+
+    example:
+    var int func add1 = (int x) =>
+        output 'x' before is x
+        return x + 1
+    end add1
+
     __init__: creates a function object which is a name, return type, parameters, and lines of program
     run: this is called to actually run the function
     __str__: is only used for debug purposes

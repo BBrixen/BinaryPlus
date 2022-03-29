@@ -38,11 +38,11 @@ def parse_line(line_num: int, lines: list[str], local_namespace: dict, execute=T
         case ['var', *x]:  # variable assignment
             local_namespace, line_num = var_assign(x, line_num, lines, local_namespace, execute=execute)
 
-        case['if', '(', *conditions, ')', 'then']:  # if statement
+        case['if', '(', *conditions, ')', '=', '>']:  # if statement
             local_namespace, line_num, retval = handle_if(line_num, lines, conditions,
                                                           local_namespace, execute=execute)
 
-        case ['while', '(', *conditions, ')', 'then']:  # while loop
+        case ['while', '(', *conditions, ')', '=', '>']:  # while loop
             local_namespace, line_num, retval = handle_while(line_num, lines, conditions,
                                                              local_namespace, execute=execute)
 
@@ -67,6 +67,11 @@ def var_assign(statements: list[str], line_num: int, lines: list[str], local_nam
     This handles a variable assignment statement
     it has the form
     var type name = value(s)
+
+    example:
+    var int age = 42
+    var str name = bennett
+    var str description = name is age year(s) old
 
     :param statements: the list of statements comprising the variable assignment
             (without var because that has been removed)
@@ -168,7 +173,7 @@ def main() -> None:
     :return: the output for the program
     """
     # filename = input()
-    filename = 'test.binp'  # I have been using this for testing
+    filename = 'expressions.binp'  # I have been using this for testing
 
     global_namespace = {}
     assert filename[-5:] == '.binp'
