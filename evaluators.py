@@ -109,6 +109,9 @@ def str_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) -
     """
     start, end = 0, len(line)
     first_elem = vals[0]
+
+    # these 2 while loops find the start and end line according to vals.
+    # this allows us to remove unwanted string expression from the edges
     while start < len(line):
         if line[start:start+len(first_elem)] == first_elem:
             break
@@ -164,8 +167,8 @@ def determine_evaluator(variable_type: str) -> EVAL_FUNC:
 def replace_all_variables(line_num: int, line: str, vals: list[str], local_namespace: dict) -> list[str]:
     """
     This replaces every variable in the namespace with its value.
-    it then looks for every function call and evaluates its return
-    It the end we have a list of values which can be parsed into
+    it then looks for every function call and evaluates its return.
+    at the end we have a list of values which can be parsed into
     a boolean or int tree
 
     :param line_num: the current line number for error printing

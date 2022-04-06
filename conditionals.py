@@ -99,6 +99,7 @@ def run_condition(line_num: int, lines: list[str], condition: bool, namespace: d
             case 'else':
                 condition = not condition  # toggle condition, since we do either if or else (never both/neither)
                 line_num += 1
+
             case _:
                 namespace, line_num, retval = parse_line(line_num, lines, namespace,
                                                          execute=(condition and execute))

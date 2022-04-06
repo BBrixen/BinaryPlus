@@ -173,7 +173,7 @@ def main() -> None:
     :return: the output for the program
     """
     # filename = input()
-    filename = 'expressions.binp'  # I have been using this for testing
+    filename = 'test.binp'  # I have been using this for testing
 
     global_namespace = {}
     assert filename[-5:] == '.binp'
