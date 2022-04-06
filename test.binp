@@ -1,25 +1,10 @@
-var bool condition = True
-
-while (condition) =>
-    output 'input 1 to terminate'
-    var bool condition = input
-
-    var bool func swapCond = (bool x) =>
-        if (x) =>
-            return False
-        else =>
-            return True
-        end
-    end swapCond
-
-    output swapping condition
-    var bool condition = swapCond(condition)
-    output swapped to condition
-    output
-
-    $ the => after else is not actually enforced, yet
-    else =>
-        output this is the last loop
+if (True) =>
+    var int func = 10
+    output func
+else =>
+    var int func name = () =>
+        output 'valid'
+        return 0
+    end name
+    name()
 end
-
-output 'terminated'

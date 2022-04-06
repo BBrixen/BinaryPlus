@@ -4,6 +4,9 @@ from evaluators import namespace_replacement, determine_evaluator
 from conditionals import handle_if, handle_while
 
 ADD_SPACES = ['(', ')', '<', '>', '!', '&&', '||', '=', ',', '.', '-', '*', '+', '/', '$']
+INVALID_VARIABLE_NAMES = ['if', 'else', 'while', 'end', 'then', 'return',
+                          'func', 'int', 'str', 'bool', 'fn', 'null', 'tup',
+                          'var', 'output', 'input', 'true', 'false']
 BEGIN_PRINT = " >>"
 
 
@@ -107,8 +110,26 @@ def var_assign(statements: list[str], line_num: int, lines: list[str], local_nam
             raise BinPSyntaxError(line_num, line, message="Invalid variable assignment")
 
     if execute and new_variable is not None:
+        name = valid_name(line_num, line, name)
         local_namespace[name] = new_variable
     return local_namespace, line_num
+
+
+def valid_name(line_num, line, name: str) -> str:
+    """
+    This function checks that a variable name is valid
+
+    :param line_num: the line number for error printing
+    :param line: the line for error printing
+    :param name: the name of the variable to check
+    :return: the variable name if it is valid
+    :throws: BinPSyntaxError if the name is invalid
+    """
+    if name[0].isalpha() and name not in INVALID_VARIABLE_NAMES:
+        return name
+
+    raise BinPSyntaxError(line_num, line, message="Invalid variable name. "
+                                                  "Variables must start with alpha and cannot be a restricted term")
 
 
 def output(line: str, local_namespace: dict) -> None:
