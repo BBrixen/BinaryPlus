@@ -3,10 +3,10 @@ from binp_functions import create_function, parse_function_call
 from evaluators import namespace_replacement, determine_evaluator
 from conditionals import handle_if, handle_while
 
-ADD_SPACES = ['(', ')', '<', '>', '!', '&&', '||', '=', ',', '.', '-', '*', '+', '/', '$']
-INVALID_VARIABLE_NAMES = ['if', 'else', 'while', 'end', 'then', 'return',
-                          'func', 'int', 'str', 'bool', 'fn', 'null', 'tup',
-                          'var', 'output', 'input', 'true', 'false']
+ADD_SPACES = {'(', ')', '<', '>', '!', '&&', '||', '=', ',', '.', '-', '*', '+', '/', '$'}
+INVALID_VARIABLE_NAMES = {'if', 'else', 'while', 'end', 'then', 'return', 'func', 'int', 'str', 'bool', 'fn', 'null',
+                          'tup', 'var', 'output', 'input', 'true', 'false'}
+VALID_VARIABLE_CHARS = set('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_')
 BEGIN_PRINT = " >>"
 
 
@@ -125,7 +125,7 @@ def valid_name(line_num, line, name: str) -> str:
     :return: the variable name if it is valid
     :throws: BinPSyntaxError if the name is invalid
     """
-    if name[0].isalpha() and name not in INVALID_VARIABLE_NAMES:
+    if set(name).issubset(VALID_VARIABLE_CHARS) and name not in INVALID_VARIABLE_NAMES:
         return name
 
     raise BinPSyntaxError(line_num, line, message="Invalid variable name. "

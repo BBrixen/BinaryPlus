@@ -113,17 +113,17 @@ def str_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) -
     # these 2 while loops find the start and end line according to vals.
     # this allows us to remove unwanted string expression from the edges
     while start < len(line):
-        if line[start:start+len(first_elem)] == first_elem:
+        if line[start - 1: start + len(first_elem) + 1] == f' {first_elem} ':
             break
         start += 1
 
-    last_elem = vals[len(vals)-1]
+    last_elem = vals[len(vals) - 1]
     while end > 0:
-        if line[end-len(last_elem):end] == last_elem:
+        if line[end - len(last_elem) - 1: end + 1] == f' {last_elem} ':
             break
         end -= 1
 
-    return namespace_replacement(line[start-1:end], local_namespace)[1:]  # 1: to remove space at start
+    return namespace_replacement(line[start - 1:end], local_namespace)[1:]  # 1: to remove space at start
 
 
 def namespace_replacement(line: str, local_namespace: dict) -> str:

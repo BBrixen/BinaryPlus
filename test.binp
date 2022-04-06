@@ -1,10 +1,4 @@
-if (True) =>
-    var int func = 10
-    output func
-else =>
-    var int func name = () =>
-        output 'valid'
-        return 0
-    end name
-    name()
-end
+var int x = 10/3
+output x
+var str strx = x
+output strx
