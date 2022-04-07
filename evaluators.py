@@ -107,6 +107,7 @@ def str_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) -
     :param local_namespace: the namespace for checking any variables
     :return: the string result of calculating everything in vals
     """
+    line = " " + line + " "
     start, end = 0, len(line)
     first_elem = vals[0]
 
@@ -122,8 +123,8 @@ def str_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) -
         if line[end - len(last_elem) - 1: end + 1] == f' {last_elem} ':
             break
         end -= 1
-
-    return namespace_replacement(line[start - 1:end], local_namespace)[1:]  # 1: to remove space at start
+    line = line[1:-1]  # remove the spaces
+    return namespace_replacement(line[start - 1:end], local_namespace)  # 1: to remove space at start
 
 
 def namespace_replacement(line: str, local_namespace: dict) -> str:
@@ -138,7 +139,7 @@ def namespace_replacement(line: str, local_namespace: dict) -> str:
     line = " " + line + " "
     for var in local_namespace:
         line = line.replace(f' {var} ', f' {local_namespace[var]} ')
-    return line
+    return line[1:-1]
 
 
 def determine_evaluator(variable_type: str) -> EVAL_FUNC:

@@ -7,7 +7,7 @@ ADD_SPACES = {'(', ')', '<', '>', '!', '&&', '||', '=', ',', '.', '-', '*', '+',
 INVALID_VARIABLE_NAMES = {'if', 'else', 'while', 'end', 'then', 'return', 'func', 'int', 'str', 'bool', 'fn', 'null',
                           'tup', 'var', 'output', 'input', 'true', 'false'}
 VALID_VARIABLE_CHARS = set('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_')
-BEGIN_PRINT = " >>"
+BEGIN_PRINT = " >> "
 
 
 def parse_line(line_num: int, lines: list[str], local_namespace: dict, execute=True) -> (dict, int, list[str] | None):
