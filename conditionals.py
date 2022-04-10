@@ -24,7 +24,9 @@ def handle_if(line_num: int, lines: list[str], conditions: list[str], namespace:
     :param execute: if this is false, we do not actually execute anything
     :return: the modified namespace after the proper function has been called
     """
-    bool_condition = bool_eval(line_num, lines[line_num], conditions, namespace)
+    bool_condition = False
+    if execute:
+        bool_condition = bool_eval(line_num, lines[line_num], conditions, namespace)
     return run_condition(line_num + 1, lines, bool_condition, namespace, execute=execute)
 
 
@@ -57,7 +59,9 @@ def handle_while(line_num: int, lines: list[str], conditions: list[str], namespa
             it can also pass return values out of a function
     """
     line_of_while = line_num - 1  # -1 because we will add one after this is called. but we want to stay on this loop
-    bool_condition = bool_eval(line_num, lines[line_num], conditions, namespace)
+    bool_condition = False
+    if execute:
+        bool_condition = bool_eval(line_num, lines[line_num], conditions, namespace)
     namespace, line_num, retval = run_condition(line_num + 1, lines, bool_condition, namespace, execute=execute)
 
     if retval is not None or not bool_condition:
