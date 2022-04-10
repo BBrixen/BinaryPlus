@@ -10,7 +10,7 @@ ADD_SPACES_INVERSE = re.compile(f" {OPERANDS} ")
 ADD_SPACES = re.compile(OPERANDS)
 INVALID_VARIABLE_NAMES = {'if', 'else', 'while', 'end', 'then', 'return', 'func', 'int', 'str', 'bool', 'fn', 'null',
                           'tup', 'var', 'output', 'input', 'true', 'false'}
-VALID_VARIABLE_CHARS = set('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_')
+VALID_VARIABLE_CHARS = set('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789_')
 BEGIN_PRINT = " >> "
 
 
@@ -129,7 +129,9 @@ def valid_name(line_num, line, name: str) -> str:
     :return: the variable name if it is valid
     :throws: BinPSyntaxError if the name is invalid
     """
-    if set(name).issubset(VALID_VARIABLE_CHARS) and name not in INVALID_VARIABLE_NAMES:
+    if set(name).issubset(VALID_VARIABLE_CHARS) and \
+       name not in INVALID_VARIABLE_NAMES and \
+       not name[0].isdecimal():
         return name
 
     raise BinPSyntaxError(line_num, line, message="Invalid variable name. "
