@@ -29,10 +29,13 @@ class BinPFunction:
 
     def __str__(self):
         """
-        Used for debugging
+        This is called when we output a function instead of its return type.
+        This can be used for debugging function calls inside binp programs
+        It has the following format:
+        name: (param_type1, param_type2, ...) -> return_type
         :return: a string representation of this function
         """
-        return f'{self._name} takes {self._params} and returns {self._return_type}'
+        return f'{self._name}: ({", ".join(elem[0] for elem in self._params)}) -> {self._return_type}'
 
     def run(self, line_num: int, line: str, params: list, function_namespace: dict):
         """

@@ -11,3 +11,39 @@ printer()
 $ now when we call the function, it has the value of x in its namespace
 var int x = 10
 printer()
+
+var int func add = (int x, int y) =>
+    return x + y
+end add
+
+var int result = add(1, 5)
+output result
+$ lets print the inputs and outputs of our add function
+output add
+
+
+output
+output
+$$$$$$$$$ SCOPING $$$$$$$$$$$
+var int outside = 1
+output 'outside' is: outside
+
+var int func someFunction = (int parameter) =>
+    output we are in the function
+    output the passed value is: parameter
+    output 'outside' is: outside
+
+    var int outside = 100
+    output 'outside' is now: outside
+    return 2 * parameter
+end someFunction
+
+$ outside will be the same before and after
+output 'outside' before calling is: outside
+var int answer = someFunction(outside)
+output 'outside' after calling is: outside
+
+$ answer should be 2 * 1, since outside is 1
+output the 'answer' is: answer
+$ this should just say "parameter is: parameter" because parameter has no value in this scope
+output 'parameter' is: parameter

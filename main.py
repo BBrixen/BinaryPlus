@@ -193,8 +193,8 @@ def format_file(file) -> list[str]:
     return retval
 
 
-def get_cli_args():
-    args = sys.argv[1:]
+def get_cli_args() -> dict:
+    args = sys.argv[2:]
     retval = {
         "ARG_COUNT": len(args)
     }
@@ -202,6 +202,7 @@ def get_cli_args():
         retval[f"ARG_{i}"] = args[i]
 
     return retval
+
 
 def main() -> None:
     """

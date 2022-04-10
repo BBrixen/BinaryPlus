@@ -93,7 +93,7 @@ def bool_replacement(line_num: int, line: str, vals: list[str], local_namespace:
                 retval.append(False)
             case '&&' | '||' | '(' | ')' | \
                  '==' | '!=' | '<' | '<=' | '>' | '>=' | \
-                int():
+                 int():
                 retval.append(val)
             case _:
                 raise BinPValueError(line_num, line, message="Invalid cast of type 'bool'")
@@ -127,7 +127,7 @@ def str_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) -
             break
         end -= 1
     line = line[1:]  # remove the spaces
-    return namespace_replacement(line[start - 1:end], local_namespace)  # 1: to remove space at start
+    return namespace_replacement(line[start - 1:end], local_namespace)[:-2]
 
 
 def namespace_replacement(line: str, local_namespace: dict) -> str:
@@ -182,17 +182,15 @@ def replace_all_variables(line_num: int, line: str, vals: list[str], local_names
     :return: list of all values replaced with their evaluation in the namespace
     """
     from binp_functions import BinPFunction, parse_function_call
-
     for i, val in enumerate(vals):
         if val in local_namespace and not isinstance(local_namespace[val], BinPFunction):
             vals[i] = local_namespace[val]
 
     vals, i, copied_namespace = parse_function_call(line_num, line, vals, local_namespace)
-
     return vals
 
 
-def convert_str_to_ints(vals: list[str]) -> list[str,int]:
+def convert_str_to_ints(vals: list[str]) -> list[str, int]:
     """
     Given a list of strings, if a string holds an integer, it is converted to a
     Python integer object. If the string does not contain an integer,
@@ -207,6 +205,7 @@ def convert_str_to_ints(vals: list[str]) -> list[str,int]:
     :param vals: the values to search for strings containing integers
     :return a new list with int strings converted to integers
     """
+
     def convert_type(v):
         if type(v) == str and v.isdigit():
             return int(v)
