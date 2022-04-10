@@ -1,4 +1,5 @@
 import re
+import sys
 
 from errors import BinPSyntaxError
 from binp_functions import create_function, parse_function_call
@@ -130,8 +131,8 @@ def valid_name(line_num, line, name: str) -> str:
     :throws: BinPSyntaxError if the name is invalid
     """
     if set(name).issubset(VALID_VARIABLE_CHARS) and \
-       name not in INVALID_VARIABLE_NAMES and \
-       not name[0].isdecimal():
+            name not in INVALID_VARIABLE_NAMES and \
+            not name[0].isdecimal():
         return name
 
     raise BinPSyntaxError(line_num, line, message="Invalid variable name. "
@@ -192,6 +193,16 @@ def format_file(file) -> list[str]:
     return retval
 
 
+def get_cli_args():
+    args = sys.argv[1:]
+    retval = {
+        "ARG_COUNT": len(args)
+    }
+    for i in range(len(args)):
+        retval[f"ARG_{i}"] = args[i]
+
+    return retval
+
 def main() -> None:
     """
     takes a filename as an input, reads it and runs it as a binary+ program
@@ -200,7 +211,9 @@ def main() -> None:
     # filename = input()
     filename = 'test.binp'  # I have been using this for testing
 
-    global_namespace = {}
+    global_namespace = {
+        **get_cli_args(),
+    }
     assert filename[-5:] == '.binp'
 
     try:
