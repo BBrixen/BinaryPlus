@@ -1,9 +1,13 @@
+import re
+
 from errors import BinPSyntaxError
 from binp_functions import create_function, parse_function_call
 from evaluators import namespace_replacement, determine_evaluator
 from conditionals import handle_if, handle_while
 
-ADD_SPACES = {'(', ')', '<', '>', '!', '&&', '||', '=', ',', '.', '-', '*', '+', '/', '$'}
+OPERANDS = "([!<>=]=|[<>=]|[\+-\/*,\.\$\(\)]|&&|\|\|)"
+ADD_SPACES_INVERSE = re.compile(f" {OPERANDS} ")
+ADD_SPACES = re.compile(OPERANDS)
 INVALID_VARIABLE_NAMES = {'if', 'else', 'while', 'end', 'then', 'return', 'func', 'int', 'str', 'bool', 'fn', 'null',
                           'tup', 'var', 'output', 'input', 'true', 'false'}
 VALID_VARIABLE_CHARS = set('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_')
@@ -96,8 +100,7 @@ def var_assign(statements: list[str], line_num: int, lines: list[str], local_nam
         case [var_type, name, '=', 'input']:
             if execute:
                 raw_input = input(BEGIN_PRINT+" ")  # use user input as the value
-                for replacement in ADD_SPACES:
-                    raw_input = raw_input.replace(replacement, f' {replacement} ')
+                raw_input = " ".join(re.split(ADD_SPACES, raw_input))
 
                 eval_func = determine_evaluator(var_type)
                 new_variable = eval_func(line_num, line[:-5] + raw_input, raw_input.split(), local_namespace)
@@ -143,8 +146,7 @@ def output(line: str, local_namespace: dict) -> None:
     """
 
     line = namespace_replacement(line, local_namespace)
-    for replacement in ADD_SPACES:
-        line = line.replace(f' {replacement} ', replacement)
+    line = "".join(re.split(ADD_SPACES_INVERSE, line))
 
     line = line.replace("'", "")
 
@@ -181,8 +183,7 @@ def format_file(file) -> list[str]:
     retval = []
     for line in lines:
         line = line.strip()  # remove extra whitespace and blank lines
-        for replacement in ADD_SPACES:
-            line = line.replace(replacement, f' {replacement} ')
+        line = " ".join(re.split(ADD_SPACES, line))
         retval.append(line)
 
     return retval
