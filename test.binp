@@ -1,37 +1,9 @@
-var null func main = () =>
-    output 'input 2 numbers to compute'
-    var int x = input
-    var int y = input
-
-    output 'input true for addition/subtraction, false for multiplication/division'
-    var bool addsub = input
-
-    if (addsub) =>
-        output 'input true for addition, false for subtraction'
-        var bool adding = input
-
-        if (adding) =>
-            var int result = x + y
-            output result
-        else
-            var int result = x - y
-            output result
-        end
-
-    else =>
-        output 'input true for multiplication, false for division'
-        var bool multing = input
-
-        if (multing) =>
-            var int result = x * y
-            output result
-        else
-            var int result = x / y
-            output result
-        end
-
+var null func test = (bool x) =>
+    output "at the beginning"
+    if (x) =>
+        return
     end
+    output "we did not end early"
+end test
 
-end main
-
-main()
+test(False)
