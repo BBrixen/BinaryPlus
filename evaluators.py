@@ -82,15 +82,18 @@ def bool_replacement(line_num: int, line: str, vals: list[str], local_namespace:
     :return: a list of booleans and strings (the strings for any boolean operators)
     """
     vals = replace_all_variables(line_num, line, vals, local_namespace)
+    vals = convert_str_to_ints(vals)
     retval = []
 
     for val in vals:
         match val:
-            case True | 'true' | 'True' | '1':
+            case True | 'true' | 'True':
                 retval.append(True)
-            case False | 'false' | 'False' | '0':
+            case False | 'false' | 'False':
                 retval.append(False)
-            case '&&' | '||' | '!' | '(' | ')':
+            case '&&' | '||' | '(' | ')' | \
+                 '==' | '!=' | '<' | '<=' | '>' | '>=' | \
+                int():
                 retval.append(val)
             case _:
                 raise BinPValueError(line_num, line, message="Invalid cast of type 'bool'")
@@ -123,7 +126,7 @@ def str_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) -
         if line[end - len(last_elem) - 1: end + 1] == f' {last_elem} ':
             break
         end -= 1
-    line = line[1:-1]  # remove the spaces
+    line = line[1:]  # remove the spaces
     return namespace_replacement(line[start - 1:end], local_namespace)  # 1: to remove space at start
 
 
@@ -139,7 +142,7 @@ def namespace_replacement(line: str, local_namespace: dict) -> str:
     line = " " + line + " "
     for var in local_namespace:
         line = line.replace(f' {var} ', f' {local_namespace[var]} ')
-    return line[1:-1]
+    return line[1:]
 
 
 def determine_evaluator(variable_type: str) -> EVAL_FUNC:
@@ -187,3 +190,26 @@ def replace_all_variables(line_num: int, line: str, vals: list[str], local_names
     vals, i, copied_namespace = parse_function_call(line_num, line, vals, local_namespace)
 
     return vals
+
+
+def convert_str_to_ints(vals: list[str]) -> list[str,int]:
+    """
+    Given a list of strings, if a string holds an integer, it is converted to a
+    Python integer object. If the string does not contain an integer,
+    it is left alone and is not modified
+
+    This function will not convert variables to numbers.
+    If this is desired, @replace_all_variables should be called first.
+
+    This function also assumes that each element does not have leading or trailing
+    whitespace surrounding the elements
+
+    :param vals: the values to search for strings containing integers
+    :return a new list with int strings converted to integers
+    """
+    def convert_type(v):
+        if type(v) == str and v.isdigit():
+            return int(v)
+        return v
+
+    return list(map(convert_type, vals))

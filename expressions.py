@@ -1,8 +1,4 @@
-# TODO Support tuple addition and subtraction
-
 from enum import Enum
-
-
 # from errors import BinPSyntaxError
 
 
@@ -35,19 +31,41 @@ BINARY_OPERATOR_MAP = {
     Operator.SUB: lambda x, y: x - y,
     Operator.DIV: lambda x, y: x // y,
     Operator.MUL: lambda x, y: x * y,
-    Operator.OR: lambda x, y: x or y,
+    Operator.OR:  lambda x, y: x or y,
     Operator.AND: lambda x, y: x and y,
 
-    Operator.GREATER_THAN: lambda x, y: x > y,
-    Operator.LESS_THAN: lambda x, y: x < y,
+    Operator.GREATER_THAN:  lambda x, y: x > y,
+    Operator.LESS_THAN:     lambda x, y: x < y,
     Operator.GREATER_EQUAL: lambda x, y: x >= y,
-    Operator.LESS_EQUAL: lambda x, y: x <= y,
-    Operator.EQUAL: lambda x, y: x == y,
-    Operator.NOT_EQUAL: lambda x, y: x != y
+    Operator.LESS_EQUAL:    lambda x, y: x <= y,
+    Operator.EQUAL:         lambda x, y: x == y,
+    Operator.NOT_EQUAL:     lambda x, y: x != y
+}
+
+BINARY_OPERATOR_STRING = {
+    "+":  Operator.ADD,
+    "-":  Operator.SUB,
+    "/":  Operator.DIV,
+    "*":  Operator.MUL,
+    "||": Operator.OR,
+    "&&": Operator.AND,
+
+    ">":  Operator.GREATER_THAN,
+    "<":  Operator.LESS_THAN,
+    ">=": Operator.GREATER_EQUAL,
+    "<=": Operator.LESS_EQUAL,
+    "==": Operator.EQUAL,
+    "!=": Operator.NOT_EQUAL,
 }
 
 
 class OpNode:
+    """
+    This class is used to represent a series of operations
+    in a tree-like manner. The root can contain either an operator
+    or a value (a boolean or integer) and the leaves can be
+    an OpNode subtree or None
+    """
     def __init__(self, op: Operator, val=None):
         self.op = op
         self.val = val
@@ -58,7 +76,6 @@ class OpNode:
         return f"OpNode({repr(self.op)},{repr(self.val)})"
 
 
-# TODO Remove namespace? (Not used at the moment)
 def eval_tree(root: OpNode) -> int | bool:
     """
     Given a boolean tree or int tree, evaluate it into a single return value
@@ -98,8 +115,7 @@ def gen_math_tree(tokens: list[str]) -> OpNode:
 
     :returns: the root of the expression tree
     """
-    root = arith_expr(tokens)
-    return root
+    return arith_expr(tokens)
 
 
 """
@@ -209,8 +225,14 @@ def bool_expr(tokens: list[str]):
         return None
 
     mine = tokens.pop(0)
-    assert isinstance(mine, bool), "Token is not a boolean"  # TODO Proper exception
-    lchild = OpNode(Operator.BOOL, mine)
+    if isinstance(mine, bool):
+        op = Operator.BOOL
+    elif isinstance(mine, int):
+        op = Operator.INT
+    else:
+        assert type(mine) in {int, bool}, "Token is not a boolean"  # TODO Proper exception
+
+    lchild = OpNode(op, mine)
     return bool_op(tokens, lchild)
 
 
@@ -219,16 +241,20 @@ def bool_op(tokens: list[str], lchild: OpNode):
         return lchild  # Epsilon
 
     mine = tokens.pop(0)
-    # TODO Account for unary not
-    if mine == "||":
-        op = Operator.OR
-    elif mine == "&&":
-        op = Operator.AND
-    else:
+    if mine not in BINARY_OPERATOR_STRING:
         assert False, "Incorrect boolean operator"  # TODO Proper exception
+
+    op = BINARY_OPERATOR_STRING[mine]
 
     root = OpNode(op)
     root.left = lchild
     root.right = bool_expr(tokens)
 
     return root
+
+
+# TODO Remove
+if __name__ == "__main__":
+    tokens = [1, "!=", 1, "||", True]
+    root = gen_bool_tree(tokens)
+    print(eval_tree(root))
