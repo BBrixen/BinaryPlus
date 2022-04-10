@@ -46,7 +46,7 @@ def int_replacement(line_num: int, line: str, vals: list[str], local_namespace: 
             retval.append(val)
         elif val.lstrip("-").isdecimal():
             retval.append(int(val))
-        elif val in {"+", "-", "*", "/", "(", ")"}:
+        elif val in {"+", "-", "*", "/", "%", "(", ")"}:
             retval.append(val)
         else:
             raise BinPValueError(line_num, line, message="Invalid cast of type 'int'")

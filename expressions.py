@@ -9,9 +9,9 @@ class Operator(Enum):
     SUB = object()
     DIV = object()
     MUL = object()
-    UNARY_NOT = object()
     OR = object()
     AND = object()
+    MODULUS = object()
     GREATER_THAN = object()
     LESS_THAN = object()
     GREATER_EQUAL = object()
@@ -34,6 +34,7 @@ BINARY_OPERATOR_MAP = {
     Operator.OR:  lambda x, y: x or y,
     Operator.AND: lambda x, y: x and y,
 
+    Operator.MODULUS:       lambda x, y: x % y,
     Operator.GREATER_THAN:  lambda x, y: x > y,
     Operator.LESS_THAN:     lambda x, y: x < y,
     Operator.GREATER_EQUAL: lambda x, y: x >= y,
@@ -50,6 +51,7 @@ BINARY_OPERATOR_STRING = {
     "||": Operator.OR,
     "&&": Operator.AND,
 
+    "%":  Operator.MODULUS,
     ">":  Operator.GREATER_THAN,
     "<":  Operator.LESS_THAN,
     ">=": Operator.GREATER_EQUAL,
@@ -92,9 +94,6 @@ def eval_tree(root: OpNode) -> int | bool:
         case Operator.INT | Operator.BOOL:
             return root.val
 
-        case Operator.UNARY_NOT:
-            return not eval_tree(root.right)
-
         case x if x in BINARY_OPERATOR_MAP:
             binary_op_func = BINARY_OPERATOR_MAP[x]
             left = eval_tree(root.left)
@@ -121,7 +120,7 @@ def gen_math_tree(tokens: list[str]) -> OpNode:
 """
 Precedence (Lowest to Highest):
     +, -
-    *, /
+    *, /, %
     parenthesis
 
 arith_expr -> arith_term arith_expr1
@@ -136,6 +135,7 @@ arith_term -> arith_factor arith_term1
 # left-factored and needs lchild
 arith_term1 -> * arith_factor arith_term1
              | / arith_factor arith_term1
+             | % arith_factor arith_term1
              | -- epsilon --
 
 arith_factor -> ( arith_expr )
@@ -187,6 +187,8 @@ def arith_term1(tokens: list[str], lchild: OpNode) -> OpNode:
             op = Operator.MUL
         case "/":
             op = Operator.DIV
+        case "%":
+            op = Operator.MODULUS
         case _:
             # Epsilon
             return lchild
