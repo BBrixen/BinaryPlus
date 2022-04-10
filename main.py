@@ -1,12 +1,17 @@
+import re
+import sys
+
 from errors import BinPSyntaxError
 from binp_functions import create_function, parse_function_call
 from evaluators import namespace_replacement, determine_evaluator
 from conditionals import handle_if, handle_while
 
-ADD_SPACES = {'(', ')', '<', '>', '!', '&&', '||', '=', ',', '.', '-', '*', '+', '/', '$'}
+OPERANDS = "([!<>=]=|[<>=]|[\+-\/*,\.\$\(\)]|&&|\|\|)"
+ADD_SPACES_INVERSE = re.compile(f" {OPERANDS} ")
+ADD_SPACES = re.compile(OPERANDS)
 INVALID_VARIABLE_NAMES = {'if', 'else', 'while', 'end', 'then', 'return', 'func', 'int', 'str', 'bool', 'fn', 'null',
                           'tup', 'var', 'output', 'input', 'true', 'false'}
-VALID_VARIABLE_CHARS = set('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_')
+VALID_VARIABLE_CHARS = set('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789_')
 BEGIN_PRINT = " >> "
 
 
@@ -97,8 +102,7 @@ def var_assign(statements: list[str], line_num: int, lines: list[str], local_nam
         case [var_type, name, '=', 'input']:
             if execute:
                 raw_input = input(BEGIN_PRINT+" ")  # use user input as the value
-                for replacement in ADD_SPACES:
-                    raw_input = raw_input.replace(replacement, f' {replacement} ')
+                raw_input = " ".join(re.split(ADD_SPACES, raw_input))
 
                 eval_func = determine_evaluator(var_type)
                 new_variable = eval_func(line_num, line[:-5] + raw_input, raw_input.split(), local_namespace)
@@ -126,7 +130,9 @@ def valid_name(line_num, line, name: str) -> str:
     :return: the variable name if it is valid
     :throws: BinPSyntaxError if the name is invalid
     """
-    if set(name).issubset(VALID_VARIABLE_CHARS) and name not in INVALID_VARIABLE_NAMES:
+    if set(name).issubset(VALID_VARIABLE_CHARS) and \
+            name not in INVALID_VARIABLE_NAMES and \
+            not name[0].isdecimal():
         return name
 
     raise BinPSyntaxError(line_num, line, message="Invalid variable name. "
@@ -144,8 +150,7 @@ def output(line: str, local_namespace: dict) -> None:
     """
 
     line = namespace_replacement(line, local_namespace)
-    for replacement in ADD_SPACES:
-        line = line.replace(f' {replacement} ', replacement)
+    line = "".join(re.split(ADD_SPACES_INVERSE, line))
 
     line = line.replace("'", "")
 
@@ -182,12 +187,21 @@ def format_file(file) -> list[str]:
     retval = []
     for line in lines:
         line = line.strip()  # remove extra whitespace and blank lines
-        for replacement in ADD_SPACES:
-            line = line.replace(replacement, f' {replacement} ')
+        line = " ".join(re.split(ADD_SPACES, line))
         retval.append(line)
 
     return retval
 
+
+def get_cli_args():
+    args = sys.argv[1:]
+    retval = {
+        "ARG_COUNT": len(args)
+    }
+    for i in range(len(args)):
+        retval[f"ARG_{i}"] = args[i]
+
+    return retval
 
 def main() -> None:
     """
@@ -197,7 +211,9 @@ def main() -> None:
     # filename = input()
     filename = 'valid_programs/function_and_scoping.binp'  # I have been using this for testing
 
-    global_namespace = {}
+    global_namespace = {
+        **get_cli_args(),
+    }
     assert filename[-5:] == '.binp'
 
     try:
