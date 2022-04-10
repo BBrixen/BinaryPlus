@@ -43,7 +43,8 @@ def parse_line(line_num: int, lines: list[str], local_namespace: dict, execute=T
                 output(lines[line_num][7:], local_namespace)
 
         case ['var', *x]:  # variable assignment
-            local_namespace, line_num = var_assign(x, line_num, lines, local_namespace, execute=execute)
+            if execute:
+                local_namespace, line_num = var_assign(x, line_num, lines, local_namespace, execute=execute)
 
         case['if', '(', *conditions, ')', '=', '>']:  # if statement
             local_namespace, line_num, retval = handle_if(line_num, lines, conditions,

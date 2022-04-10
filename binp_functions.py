@@ -60,7 +60,7 @@ class BinPFunction:
 
         end_line, function_return = run_program(self._lines, function_namespace)
 
-        if function_return is None:
+        if function_return is None or function_return == []:
             if self._return_type != 'null':
                 raise BinPValueError(line_num, line, message=f"Returned 'null' for type '{self._return_type}'")
             return 'null'
