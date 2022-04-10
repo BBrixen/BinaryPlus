@@ -1,0 +1,22 @@
+$ basic if statement, including an else statement
+var bool condition = true
+if (True) =>
+    output "the true condition is running"
+else =>
+    output "oh we are in the false condition now"
+end
+
+$ basic while loop
+while (False) =>
+    output dont make this true, because we will get an infinite loop
+end
+
+$ calling user input
+output input true to begin looping
+var bool condition = input
+while (condition) =>
+    output input false when you want to stop
+    var bool condition = input
+end
+output goodbye
+

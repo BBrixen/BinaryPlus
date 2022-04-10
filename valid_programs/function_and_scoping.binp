@@ -1,0 +1,13 @@
+$ most basic function. takes no arguments and returns nothing
+$ note: we put '' around printer because otherwise it will print out the definition of this function
+var null func printer = () =>
+    output you have called the 'printer'
+    output x
+end printer
+
+$ calling a function with no arguments
+printer()
+
+$ now when we call the function, it has the value of x in its namespace
+var int x = 10
+printer()

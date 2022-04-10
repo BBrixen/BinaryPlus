@@ -86,9 +86,9 @@ def bool_replacement(line_num: int, line: str, vals: list[str], local_namespace:
 
     for val in vals:
         match val:
-            case True | 'true' | 'True' | '1':
+            case True | 'true' | 'True' | '1' | 1:
                 retval.append(True)
-            case False | 'false' | 'False' | '0':
+            case False | 'false' | 'False' | '0' | 0:
                 retval.append(False)
             case '&&' | '||' | '!' | '(' | ')':
                 retval.append(val)
@@ -185,5 +185,4 @@ def replace_all_variables(line_num: int, line: str, vals: list[str], local_names
             vals[i] = local_namespace[val]
 
     vals, i, copied_namespace = parse_function_call(line_num, line, vals, local_namespace)
-
     return vals

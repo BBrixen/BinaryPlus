@@ -60,7 +60,8 @@ class BinPFunction:
 
         end_line, function_return = run_program(self._lines, function_namespace)
 
-        if function_return is None or function_return == []:
+        # returned nothing
+        if function_return is None or function_return == [] or function_return == ['null']:
             if self._return_type != 'null':
                 raise BinPValueError(line_num, line, message=f"Returned 'null' for type '{self._return_type}'")
             return 'null'
@@ -126,7 +127,6 @@ def parse_function_lines(line_num: int, lines: list[str], name: str) -> (list[st
     :param name: the name of this function
     :return: the lines for this function and the line number of the end
     """
-    # TODO: need to change this from 'end name' to just 'end'
     end_line = line_num
     for i in range(line_num, len(lines)):
         line = lines[i].split()

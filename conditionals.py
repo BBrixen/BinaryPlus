@@ -101,7 +101,8 @@ def run_condition(line_num: int, lines: list[str], condition: bool, namespace: d
             case 'end':
                 return namespace, line_num, None
             case 'else':
-                condition = not condition  # toggle condition, since we do either if or else (never both/neither)
+                # WARNING: if conditionals break, then remove the 'and execute'
+                condition = not condition and execute  # toggle condition (still keep this false if execute is false)
                 line_num += 1
 
             case _:

@@ -56,7 +56,7 @@ def parse_line(line_num: int, lines: list[str], local_namespace: dict, execute=T
 
         case ['return', *vals]:  # returning a value
             if execute:
-                return None, line_num, vals  # TODO: might need to make this return local_namespace
+                return None, line_num, vals  # WARNING: might need to make this return local_namespace
 
         case default:
             raise BinPSyntaxError(line_num, default)
@@ -195,7 +195,7 @@ def main() -> None:
     :return: the output for the program
     """
     # filename = input()
-    filename = 'test.binp'  # I have been using this for testing
+    filename = 'valid_programs/function_and_scoping.binp'  # I have been using this for testing
 
     global_namespace = {}
     assert filename[-5:] == '.binp'

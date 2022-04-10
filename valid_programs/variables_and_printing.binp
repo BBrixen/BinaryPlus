@@ -1,0 +1,30 @@
+$ printing output
+output hello world
+
+$ creating and combining variables
+var str name = gandalf
+var int age = 24000
+var bool cool = true
+var str description = name is age years old and coolness is cool
+output description
+
+$ casting and changing types
+var int x = 10
+output 'x as an int is' x
+$ BENNETT: FIX THIS ITS STILL BROKEN
+var str x = x
+output 'x as a str is' x
+
+$ BENNETT: if this is broken then i need to add | 0 and | 1 to the boolean replacement
+$ boolean inference from integers
+var int x = 0
+var bool x = x
+output x
+
+$ boolean expressions
+var bool x = True && False || True
+output x
+
+$ integer expressions
+var int x = 10 - 7 * 5 + 10
+output x
