@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
+
 import re
+import os
 import sys
 
 from errors import BinPSyntaxError, BinPValueError, BinPArgumentError
@@ -17,6 +19,14 @@ BEGIN_PRINT = " >> "
 INTERACTIVE_PRINT = " -- "
 INTERACTIVE_PRINT_NESTED = ' ---- '
 INTERACTIVE = False
+
+
+def eprint(*args, **kwargs):
+    """
+    A print() function which outputs to STDERR
+    as opposed to STDOUT
+    """
+    print(*args, file=sys.stderr, **kwargs)
 
 
 def parse_line(line_num: int, lines: list[str], local_namespace: dict,
@@ -205,6 +215,7 @@ def run_interactive(local_namespace: dict) -> (str, None | list[str]):
     lines = []
     line_num = 0
     previous_line_num = -1
+    print("Press Ctrl-C to exit the interactive prompt")
     while True:
 
         # get input (if we want to in this situation)
@@ -262,6 +273,35 @@ def format_line(line: str) -> str:
     return line
 
 
+def get_source_file():
+    """
+    Get the source filename from command line arguments via sys.argv
+    (which is assumed to be the first argument passed into the function).
+    It also assumes it has a filename to grab from the command line arguments
+    (it will IndexError if sys.argv does not have index 1)
+    **This exits the program via sys.exit() if the file does not exist**
+
+    :returns the source file input from command line arguments
+    """
+    filename = sys.argv[1]
+    if not os.path.exists(filename):
+        eprint("The source program does not exist!")
+        eprint(f"python {sys.argv[0]} <SOURCE PROGRAM> <ARGUMENTS>")
+        sys.exit(1)
+
+    if not os.path.isfile(filename):
+        eprint("The input is not a file!")
+        eprint(f"python {sys.argv[0]} <SOURCE PROGRAM> <ARGUMENTS>")
+        sys.exit(1)
+
+    if filename[-5:] != '.binp':
+        eprint('Source file must be a .binp file!')
+        eprint(f"python {sys.argv[0]} <SOURCE PROGRAM> <ARGUMENTS>")
+        sys.exit(1)
+
+    return filename
+
+
 def get_cli_args(args) -> dict:
     """
     This takes the command line arguments passed to python and
@@ -289,14 +329,12 @@ def main() -> None:
         return
 
     # getting and loading file
-    filename = args[1]
-    if filename[-5:] != '.binp':
-        print('Improper file extension')
+    filename = get_source_file()
     try:
         file = open(filename)
-    except FileNotFoundError:
-        print('File does not exist')
-        return
+    except OSError:
+        eprint("Unable to open file")
+        sys.exit(1)
 
     # running the code in the file
     global_namespace = {
