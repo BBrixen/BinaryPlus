@@ -1,0 +1,13 @@
+$ Boolean logic
+var bool myBool2 = true || false
+output true || false = myBool2
+
+$ Do a semi-complex math expression
+var int myInt = 1 + 2 * 5
+var int myIntTwo = (1 + 2) * 5
+output 1 + 2 * 5 = myInt
+output (1 + 2) * 5 = myInt2
+
+$ Perform modulus operation
+var int modulus = 8 % 3
+output 8 % 3 = modulus
