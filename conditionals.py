@@ -16,7 +16,6 @@ def handle_if(line_num: int, lines: list[str], conditions: list[str], namespace:
     [...]
     end
     This will run which ever function is valid for the given condition
-
     :param line_num: the line number of this if statement, for error printing
     :param lines: the lines of the program, used for traversing the if statement
     :param conditions: the list of all commands for this if, including the condition and the functions
@@ -24,6 +23,8 @@ def handle_if(line_num: int, lines: list[str], conditions: list[str], namespace:
     :param execute: if this is false, we do not actually execute anything
     :param interactive: if this is false, we want to call a different run_condition that
                         instead allows the user to type lines one at a time
+    :param skip_input: if this is true, we do not want to take input from the user
+            during interactive mode (this is for while loop)
     :return: the modified namespace after the proper function has been called
     """
     bool_condition = False
@@ -42,7 +43,7 @@ def handle_while(line_num: int, lines: list[str], conditions: list[str], namespa
     This creates a while loop. it is essentially the same as an if statement,
     except instead of going to the end of the if statement,
     it will instead tell the program to go back to the beginning of the while loop
-    and start again. if the condition if false it will skip the entire while loop
+    and start again. if the condition is false it will skip the entire while loop
 
     You can also provide an else statement which will execute once when the condition is false
 
@@ -61,6 +62,10 @@ def handle_while(line_num: int, lines: list[str], conditions: list[str], namespa
     :param conditions: the condition for the while loop to run
     :param namespace: the namespace which will be edited in this while loop
     :param execute: if this is false, do not actually execute anything inside the while loop
+    :param interactive: if this is false, we want to call a different run_condition that
+                        instead allows the user to type lines one at a time
+    :param skip_input: if this is true, we do not want to take input from the user
+            during interactive mode (this is for while loop)
     :return: this returns the modified namespace, along with the line number to go to next after this finishes
             it can also pass return values out of a function
     """
@@ -86,7 +91,6 @@ def run_condition(line_num: int, lines: list[str], condition: bool, namespace: d
     """
     This runs through a conditional (if or while) and executes the code if it can
     It handles the end of the conditional, as well as any else blocks within it
-
     :param line_num: the line number for the first line of code after if/while starts
     :param lines: the lines of the program to loop over
     :param condition: the condition as an evaluated boolean
@@ -141,6 +145,8 @@ def run_condition_interactive(line_num: int, lines: list[str], condition: bool, 
             so that nothing in this section gets executed.
             we do 'condition and execute' because if either one of them is false,
             the specific line of code being parsed should not be executed
+    :param skip_input: if this is true, we do not want to take input from the user
+            during interactive mode (this is for while loop)
     :return: the namespace after the lines have been run,
             as well as the line number of the end of this conditional,
             and a retval if something was returned from this conditional

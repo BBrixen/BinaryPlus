@@ -35,7 +35,8 @@ def parse_line(line_num: int, lines: list[str], local_namespace: dict,
     :param execute: if this is false, we do not want to execute this line of code,
             rather just act like we did, and move the line_number along accordingly
     :param interactive: if this is true, we are taking input from the user one line at a time
-    :param skip_input: this is passed through to interactive while loops so they dont ask for input after being created
+    :param skip_input: this is passed through to interactive while loops, so they don't ask
+            for input after being created
     :return: the new namespace with added variables
     """
     retval = None
@@ -94,7 +95,6 @@ def var_assign(statements: list[str], line_num: int, lines: list[str], local_nam
     var int age = 42
     var str name = bennett
     var str description = name is age year(s) old
-
     :param statements: the list of statements comprising the variable assignment
             (without var because that has been removed)
     :param line_num: the line number for error messages
@@ -138,7 +138,6 @@ def var_assign(statements: list[str], line_num: int, lines: list[str], local_nam
 def valid_name(line_num, line, name: str) -> str:
     """
     This function checks that a variable name is valid
-
     :param line_num: the line number for error printing
     :param line: the line for error printing
     :param name: the name of the variable to check
@@ -215,7 +214,7 @@ def run_interactive(local_namespace: dict) -> (str, None | list[str]):
             if line_num != previous_line_num:
                 new_line = format_line(input(INTERACTIVE_PRINT))
                 inputting = True
-        except (KeyboardInterrupt, EOFError) as err:
+        except (KeyboardInterrupt, EOFError):
             sys.exit(3)
 
         try:
@@ -252,7 +251,7 @@ def format_file(file) -> list[str]:
 
 def format_line(line: str) -> str:
     """
-    This takes a single line and formats it so we can parse it properly
+    This takes a single line and formats it, so we can parse it properly
     We can use this in both format_file for running an entire program, or to format
     a single line for the interactive system
     :param line: a single line which will be run
@@ -264,6 +263,12 @@ def format_line(line: str) -> str:
 
 
 def get_cli_args(args) -> dict:
+    """
+    This takes the command line arguments passed to python and
+    converts them to command line arguments in binp
+    :param args: the arguments passed to this program
+    :return: the global namespace with command line arguments
+    """
     retval = {
         "ARG_COUNT": len(args)
     }

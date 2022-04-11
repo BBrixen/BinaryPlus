@@ -1,12 +1,8 @@
-# this is where i want to put all the int_eval, bool_eval, str_eval, and func_eval functions
-# to hopefully decrease clutter in main.py
 from errors import BinPValueError
 from expressions import gen_bool_tree, eval_tree, gen_math_tree
 from collections.abc import Callable
 
 EVAL_FUNC = Callable[[int, str, list[int], dict], bool | str | int]
-VALID_VARIABLE_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" \
-                            "abcdefghijklmnopqrstuvwxy1234567890_'"
 
 
 def int_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) -> int:
@@ -25,7 +21,7 @@ def int_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) -
 
 def int_replacement(line_num: int, line: str, vals: list[str], local_namespace: dict) -> list[bool | str]:
     """
-    This searches through a int expression and replaces any variable names with ints.
+    This searches through an int expression and replaces any variable names with ints
     :param line_num: the line of this expression for error message
     :param line: the entire line for error message
     :param vals: the vals to be converted into a list of bool vals
@@ -154,7 +150,7 @@ def determine_evaluator(variable_type: str) -> EVAL_FUNC:
     :param variable_type: the type of the variable(s)
     :return: the evaluator function for that type
 
-    NOTE: ignore these type warnings, idk why pycharm is yelling at me, this is perfectly valid
+    NOTE: ignore these type warnings, IDK why pycharm is yelling at me, this is perfectly valid
     """
     match variable_type:
         case 'int':
@@ -177,7 +173,6 @@ def replace_all_variables(line_num: int, line: str, vals: list[str], local_names
     it then looks for every function call and evaluates its return.
     at the end we have a list of values which can be parsed into
     a boolean or int tree
-
     :param line_num: the current line number for error printing
     :param line: the current line for error printing
     :param vals: the values that need to be replaced with variables or function returns
@@ -204,7 +199,6 @@ def convert_str_to_ints(vals: list[str]) -> list[str, int]:
 
     This function also assumes that each element does not have leading or trailing
     whitespace surrounding the elements
-
     :param vals: the values to search for strings containing integers
     :return a new list with int strings converted to integers
     """
