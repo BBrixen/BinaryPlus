@@ -113,11 +113,14 @@ def str_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) -
     line = " " + line + " "
     start, end = 0, len(line)
     first_elem = vals[0]
+    after_equals = False
 
     # these 2 while loops find the start and end line according to vals.
     # this allows us to remove unwanted string expression from the edges
     while start < len(line):
-        if line[start - 1: start + len(first_elem) + 1] == f' {first_elem} ':
+        if line[start] == '=':
+            after_equals = True
+        if after_equals and line[start - 1: start + len(first_elem) + 1] == f' {first_elem} ':
             break
         start += 1
 

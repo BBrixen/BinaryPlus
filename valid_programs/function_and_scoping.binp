@@ -20,10 +20,9 @@ var int result = add(1, 5)
 output result
 $ lets print the inputs and outputs of our add function
 output add
-
-
 output
 output
+
 $$$$$$$$$ SCOPING $$$$$$$$$$$
 var int outside = 1
 output 'outside' is: outside

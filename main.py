@@ -210,7 +210,7 @@ def main() -> None:
     :return: the output for the program
     """
     # filename = input()
-    filename = 'valid_programs/function_and_scoping.binp'  # I have been using this for testing
+    filename = 'valid_programs/variables_and_printing.binp'  # I have been using this for testing
 
     global_namespace = {
         **get_cli_args(),
