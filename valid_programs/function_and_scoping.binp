@@ -2,7 +2,7 @@ $ most basic function. takes no arguments and returns nothing
 $ note: we put '' around printer because otherwise it will print out the definition of this function
 var null func printer = () =>
     output you have called the 'printer'
-    output x
+    output 'x' inside 'printer' is x
 end printer
 
 $ calling a function with no arguments

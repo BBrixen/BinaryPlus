@@ -15,9 +15,12 @@ INVALID_VARIABLE_NAMES = {'if', 'else', 'while', 'end', 'then', 'return', 'func'
 VALID_VARIABLE_CHARS = set('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789_')
 BEGIN_PRINT = " >> "
 INTERACTIVE_PRINT = " -- "
+INTERACTIVE_PRINT_NESTED = ' ---- '
+INTERACTIVE = False
 
 
-def parse_line(line_num: int, lines: list[str], local_namespace: dict, execute=True) -> (dict, int, list[str] | None):
+def parse_line(line_num: int, lines: list[str], local_namespace: dict,
+               execute=True, interactive=False, skip_input=False) -> (dict, int, list[str] | None):
     """
     This is the highest level for parsing input. it handles:
         comments, output, variable assignment, if statements, while loops
@@ -31,6 +34,7 @@ def parse_line(line_num: int, lines: list[str], local_namespace: dict, execute=T
             within a function call
     :param execute: if this is false, we do not want to execute this line of code,
             rather just act like we did, and move the line_number along accordingly
+    :param interactive: if this is true, we are taking input from the user one line at a time
     :return: the new namespace with added variables
     """
     retval = None
@@ -47,19 +51,25 @@ def parse_line(line_num: int, lines: list[str], local_namespace: dict, execute=T
 
         case ['var', *x]:  # variable assignment
             if execute:
-                local_namespace, line_num = var_assign(x, line_num, lines, local_namespace, execute=execute)
+                local_namespace, line_num = var_assign(x, line_num, lines, local_namespace,
+                                                       execute=execute, interactive=interactive)
 
         case['if', '(', *conditions, ')', '=', '>']:  # if statement
-            local_namespace, line_num, retval = handle_if(line_num, lines, conditions,
-                                                          local_namespace, execute=execute)
+            local_namespace, line_num, retval = handle_if(line_num, lines, conditions, local_namespace,
+                                                          execute=execute,
+                                                          interactive=interactive,
+                                                          skip_input=skip_input)
 
         case ['while', '(', *conditions, ')', '=', '>']:  # while loop
-            local_namespace, line_num, retval = handle_while(line_num, lines, conditions,
-                                                             local_namespace, execute=execute)
+            local_namespace, line_num, retval = handle_while(line_num, lines, conditions, local_namespace,
+                                                             execute=execute,
+                                                             interactive=interactive,
+                                                             skip_input=skip_input)
 
         case [func_name, '(', *params, ')']:  # function call
             if execute:
-                parse_function_call(line_num, lines[line_num], [func_name, '(', *params, ')'], local_namespace)
+                parse_function_call(line_num, lines[line_num], [func_name, '(', *params, ')'],
+                                    local_namespace)
 
         case ['return', *vals]:  # returning a value
             if execute:
@@ -73,7 +83,7 @@ def parse_line(line_num: int, lines: list[str], local_namespace: dict, execute=T
 
 
 def var_assign(statements: list[str], line_num: int, lines: list[str], local_namespace: dict,
-               execute=True) -> (dict, int):
+               execute=True, interactive=False) -> (dict, int):
     """
     This handles a variable assignment statement
     it has the form
@@ -91,6 +101,7 @@ def var_assign(statements: list[str], line_num: int, lines: list[str], local_nam
     :param local_namespace: the namespace which will be updates with the new variable
     :param execute: if this is false, we do not actually create the variable,
             but rather we act like we created it for keeping track of the line number
+    :param interactive: if this is true, we are taking input from the user one line at a time
     :return: the new namespace with this variable added
     """
     line = lines[line_num]
@@ -99,11 +110,12 @@ def var_assign(statements: list[str], line_num: int, lines: list[str], local_nam
     match statements:
         case [return_type, 'func', name, '=', '(', *params, ')', '=', '>']:  # function declaration
             # create function
-            new_variable, line_num = create_function(line_num, lines, return_type, name, params)
+            new_variable, line_num = \
+                create_function(line_num, lines, return_type, name, params, interactive=interactive)
 
         case [var_type, name, '=', 'input']:
             if execute:
-                raw_input = input(BEGIN_PRINT+" ")  # use user input as the value
+                raw_input = input(BEGIN_PRINT)  # use user input as the value
                 raw_input = " ".join(re.split(ADD_SPACES, raw_input))
 
                 eval_func = determine_evaluator(var_type)
@@ -173,22 +185,41 @@ def run_program(lines: list[str], local_namespace: dict) -> (str, None | list[st
             return lines[line_num], retval
 
     if not lines:
-        return [], None
+        return None, None
     return lines[line_num-1], None  # return none since there was no return in this section
 
 
 def run_interactive(local_namespace: dict) -> (str, None | list[str]):
+    """
+    We call this function when we want to run the interactive version of binary plus
+    It takes singles lines from the user at a time and parses it.
+    This allows the user to essentially type a program one line at a time and have it run as they type
+    :param local_namespace: the namespace which holds all the variable definitions
+    :return: returns
+    """
     lines = []
     line_num = 0
+    previous_line_num = -1
     while True:
+
+        # get input (if we want to in this situation)
+        new_line = None
+        inputting = False
         try:
-            new_line = format_line(input(INTERACTIVE_PRINT))
+            if line_num != previous_line_num:
+                new_line = format_line(input(INTERACTIVE_PRINT))
+                inputting = True
         except KeyboardInterrupt:
             sys.exit(3)
 
         try:
-            lines.append(new_line)
-            local_namespace, line_num, retval = parse_line(line_num, lines, local_namespace)
+            if line_num is not None:
+                lines.append(new_line)
+
+            previous_line_num = line_num
+            local_namespace, line_num, retval = parse_line(line_num, lines, local_namespace, interactive=True,
+                                                           skip_input=not inputting)
+            
             if retval is not None:  # we got a return value from this function, so we need to pass on the return
                 return lines[line_num], retval
         except (BinPSyntaxError, BinPValueError, BinPArgumentError) as err:
@@ -242,25 +273,26 @@ def main() -> None:
     :return: the output for the program
     """
     args = sys.argv
-
-    if len(args) <= 1:
+    if len(args) <= 1:  # interactive version
         run_interactive({})
         return
-    global_namespace = {
-        **get_cli_args(args[2:]),
-    }
 
+    # getting and loading file
     filename = args[1]
     if filename[-5:] != '.binp':
         print('Improper file extension')
-
     try:
         file = open(filename)
-        lines = format_file(file)
-        run_program(lines, global_namespace)
     except FileNotFoundError:
         print('File does not exist')
         return
+
+    # running the code in the file
+    global_namespace = {
+        **get_cli_args(args[2:]),
+    }
+    lines = format_file(file)
+    run_program(lines, global_namespace)
 
 
 if __name__ == '__main__':

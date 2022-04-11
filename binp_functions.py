@@ -1,3 +1,5 @@
+import sys
+
 from errors import BinPSyntaxError, BinPValueError, BinPArgumentError
 from evaluators import determine_evaluator
 
@@ -51,9 +53,8 @@ class BinPFunction:
 
         # make sure the parameters passed are the correct length
         if len(params) != len(self._params) and (self._params == [] and params != [[]]):
-            print(f'expected {self._params}')
-            print(f'got {params}')
-            raise BinPArgumentError(line_num, line, message=f"Incorrect number of arguments in {self._name} call")
+            raise BinPArgumentError(line_num, line, message=f"Incorrect number of arguments in {self._name} call"
+                                                            f"\nExpected: {self._params} \nGot: {params}")
 
         # modify the namespace with parameters passed in
         for i in range(len(self._params)):
@@ -74,7 +75,7 @@ class BinPFunction:
 
 
 def create_function(line_num: int, lines: list[str], return_type: str, name: str,
-                    params: list[str]):
+                    params: list[str], interactive=False):
     """
     This takes in a line and parses it into a BinPFunction object.
     We need to parse the parameters and determine which lines of the program are in this function
@@ -83,13 +84,14 @@ def create_function(line_num: int, lines: list[str], return_type: str, name: str
     :param return_type: the return type of this function
     :param name: the name of this function
     :param params: the parameters, which is an un-parsed list of alternating types and names
+    :param interactive: if this is true, we are taking input from the user one line at a time
     :return: this returns a BinPFunction object as well as an integer for the line number of the end of the function
     """
     # parse params into (type, name)
     params = parse_parameter_declaration(line_num, lines[line_num], params)
 
     # find the lines of code that reference the function
-    function_lines, end_line_num = parse_function_lines(line_num, lines, name)
+    function_lines, end_line_num = parse_function_lines(line_num, lines, name, interactive=interactive)
 
     return BinPFunction(name, return_type, params, function_lines), end_line_num
 
@@ -119,7 +121,7 @@ def parse_parameter_declaration(line_num, line, params: list[str]) -> list[(str,
     return parsed_params
 
 
-def parse_function_lines(line_num: int, lines: list[str], name: str) -> (list[str], int):
+def parse_function_lines(line_num: int, lines: list[str], name: str, interactive=False) -> (list[str], int):
     """
     This determines which lines of the program are associated with a specific function. we are searching for:
     end [name]
@@ -128,8 +130,21 @@ def parse_function_lines(line_num: int, lines: list[str], name: str) -> (list[st
     :param line_num: the line number for the start of the number
     :param lines: the lines of the code which need to be associated with this function
     :param name: the name of this function
+    :param interactive: if this is true, we are taking input from the user one line at a time
     :return: the lines for this function and the line number of the end
     """
+    from main import format_line, INTERACTIVE_PRINT_NESTED
+    if interactive:
+        lines = []
+        while True:
+            try:
+                line = format_line(input(INTERACTIVE_PRINT_NESTED))
+                if line.split() == ['end', name]:
+                    return lines, 0
+                lines.append(line)
+            except KeyboardInterrupt:
+                sys.exit(3)
+
     end_line = line_num
     for i in range(line_num, len(lines)):
         line = lines[i].split()
