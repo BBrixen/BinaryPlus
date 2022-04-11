@@ -1,7 +1,8 @@
+#!/usr/bin/env python3
 import re
 import sys
 
-from errors import BinPSyntaxError
+from errors import BinPSyntaxError, BinPValueError, BinPArgumentError
 from binp_functions import create_function, parse_function_call
 from evaluators import namespace_replacement, determine_evaluator
 from conditionals import handle_if, handle_while
@@ -13,6 +14,7 @@ INVALID_VARIABLE_NAMES = {'if', 'else', 'while', 'end', 'then', 'return', 'func'
                           'tup', 'var', 'output', 'input', 'true', 'false'}
 VALID_VARIABLE_CHARS = set('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789_')
 BEGIN_PRINT = " >> "
+INTERACTIVE_PRINT = " -- "
 
 
 def parse_line(line_num: int, lines: list[str], local_namespace: dict, execute=True) -> (dict, int, list[str] | None):
@@ -63,8 +65,8 @@ def parse_line(line_num: int, lines: list[str], local_namespace: dict, execute=T
             if execute:
                 return None, line_num, vals  # WARNING: might need to make this return local_namespace
 
-        case default:
-            raise BinPSyntaxError(line_num, default)
+        case _:
+            raise BinPSyntaxError(line_num, lines[line_num])
 
     line_num += 1
     return local_namespace, line_num, retval  # return none when there are no return values to pass up
@@ -175,6 +177,25 @@ def run_program(lines: list[str], local_namespace: dict) -> (str, None | list[st
     return lines[line_num-1], None  # return none since there was no return in this section
 
 
+def run_interactive(local_namespace: dict) -> (str, None | list[str]):
+    lines = []
+    line_num = 0
+    while True:
+        try:
+            new_line = format_line(input(INTERACTIVE_PRINT))
+        except KeyboardInterrupt:
+            sys.exit(3)
+
+        try:
+            lines.append(new_line)
+            local_namespace, line_num, retval = parse_line(line_num, lines, local_namespace)
+            if retval is not None:  # we got a return value from this function, so we need to pass on the return
+                return lines[line_num], retval
+        except (BinPSyntaxError, BinPValueError, BinPArgumentError) as err:
+            print(err)
+            line_num += 1
+
+
 def format_file(file) -> list[str]:
     """
     This takes the file and converts it into a formatted list of lines
@@ -186,15 +207,26 @@ def format_file(file) -> list[str]:
     lines = file.readlines()
     retval = []
     for line in lines:
-        line = line.strip()  # remove extra whitespace and blank lines
-        line = " ".join(re.split(ADD_SPACES, line))
+        line = format_line(line)
         retval.append(line)
 
     return retval
 
 
-def get_cli_args() -> dict:
-    args = sys.argv[2:]
+def format_line(line: str) -> str:
+    """
+    This takes a single line and formats it so we can parse it properly
+    We can use this in both format_file for running an entire program, or to format
+    a single line for the interactive system
+    :param line: a single line which will be run
+    :return: the line formatted, so we can properly parse it
+    """
+    line = line.strip()  # remove extra whitespace and blank lines
+    line = " ".join(re.split(ADD_SPACES, line))
+    return line
+
+
+def get_cli_args(args) -> dict:
     retval = {
         "ARG_COUNT": len(args)
     }
@@ -209,20 +241,26 @@ def main() -> None:
     takes a filename as an input, reads it and runs it as a binary+ program
     :return: the output for the program
     """
-    # filename = input()
-    filename = 'valid_programs/variables_and_printing.binp'  # I have been using this for testing
+    args = sys.argv
 
+    if len(args) <= 1:
+        run_interactive({})
+        return
     global_namespace = {
-        **get_cli_args(),
+        **get_cli_args(args[2:]),
     }
-    assert filename[-5:] == '.binp'
+
+    filename = args[1]
+    if filename[-5:] != '.binp':
+        print('Improper file extension')
 
     try:
         file = open(filename)
         lines = format_file(file)
         run_program(lines, global_namespace)
     except FileNotFoundError:
-        assert False, "File does not exist"
+        print('File does not exist')
+        return
 
 
 if __name__ == '__main__':
