@@ -9,7 +9,7 @@ from binp_functions import create_function, parse_function_call
 from evaluators import namespace_replacement, determine_evaluator
 from conditionals import handle_if, handle_while
 
-OPERANDS = "([!<>=]=|[<>=]|[\+-\/*,\.\$\(\)]|&&|\|\|)"
+OPERANDS = "([!<>=]=|[<>=]|[\+-\/*,\.\$\(\)\%]|&&|\|\|)"
 ADD_SPACES_INVERSE = re.compile(f" {OPERANDS} ")
 ADD_SPACES = re.compile(OPERANDS)
 INVALID_VARIABLE_NAMES = {'if', 'else', 'while', 'end', 'then', 'return', 'func', 'int', 'str', 'bool', 'fn', 'null',
