@@ -35,6 +35,7 @@ def parse_line(line_num: int, lines: list[str], local_namespace: dict,
     :param execute: if this is false, we do not want to execute this line of code,
             rather just act like we did, and move the line_number along accordingly
     :param interactive: if this is true, we are taking input from the user one line at a time
+    :param skip_input: this is passed through to interactive while loops so they dont ask for input after being created
     :return: the new namespace with added variables
     """
     retval = None
@@ -180,7 +181,12 @@ def run_program(lines: list[str], local_namespace: dict) -> (str, None | list[st
     """
     line_num: int = 0
     while line_num < len(lines):
-        local_namespace, line_num, retval = parse_line(line_num, lines, local_namespace)
+        try:
+            local_namespace, line_num, retval = parse_line(line_num, lines, local_namespace)
+        except (BinPSyntaxError, BinPValueError, BinPArgumentError) as err:
+            print(err)  # change this to 'raise err' if you want the stacktrace of the exception
+            sys.exit(3)
+
         if retval is not None:  # we got a return value from this function, so we need to pass on the return
             return lines[line_num], retval
 
@@ -209,7 +215,7 @@ def run_interactive(local_namespace: dict) -> (str, None | list[str]):
             if line_num != previous_line_num:
                 new_line = format_line(input(INTERACTIVE_PRINT))
                 inputting = True
-        except KeyboardInterrupt:
+        except (KeyboardInterrupt, EOFError) as err:
             sys.exit(3)
 
         try:
