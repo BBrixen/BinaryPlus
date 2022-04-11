@@ -1,0 +1,18 @@
+
+
+if (ARG_COUNT < 3) =>
+    output This program expects that the file be called with three arguments like so:
+    output python binp.py arg1 arg2 arg3
+else =>
+    output Number of arguments: ARG_COUNT
+    output =======================
+    output first arg: ARG_0
+    output second arg: ARG_1
+    output third arg: ARG_2
+end
+
+if (ARG_COUNT > 3) =>
+    var int argsLeft = ARG_COUNT - 3
+    output
+    output argsLeft other variable(s) are defined but not displayed
+end
