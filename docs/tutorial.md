@@ -11,3 +11,7 @@ TODO Write
 ## Function Declarations
 
 TODO Write
+
+## Conditionals
+
+TODO Write

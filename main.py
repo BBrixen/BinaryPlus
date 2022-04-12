@@ -224,14 +224,13 @@ def run_interactive(local_namespace: dict) -> (str, None | list[str]):
         try:
             if line_num != previous_line_num:
                 new_line = format_line(input(INTERACTIVE_PRINT))
+                lines.append(new_line)
                 inputting = True
+                line_num = len(lines)-1
         except (KeyboardInterrupt, EOFError):
             sys.exit(3)
 
         try:
-            if line_num is not None:
-                lines.append(new_line)
-
             previous_line_num = line_num
             local_namespace, line_num, retval = parse_line(line_num, lines, local_namespace, interactive=True,
                                                            skip_input=not inputting)
