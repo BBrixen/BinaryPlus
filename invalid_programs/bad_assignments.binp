@@ -1,0 +1,6 @@
+
+$ Assigning an integer value to a boolean variable
+$ This is invalid and should cause an error
+var bool myBool = 5 / 2 + 1
+
+output myBool
