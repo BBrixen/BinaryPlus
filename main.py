@@ -185,7 +185,7 @@ def run_program(lines: list[str], local_namespace: dict) -> (str, None | list[st
         try:
             local_namespace, line_num, retval = parse_line(line_num, lines, local_namespace)
         except (BinPSyntaxError, BinPValueError, BinPArgumentError, BinPRuntimeError) as err:
-            print(err)  # change this to 'raise err' if you want the stacktrace of the exception
+            eprint(err)  # change this to 'raise err' if you want the stacktrace of the exception
             sys.exit(3)
 
         if retval is not None:  # we got a return value from this function, so we need to pass on the return
@@ -226,11 +226,11 @@ def run_interactive(local_namespace: dict) -> (str, None | list[str]):
             previous_line_num = line_num
             local_namespace, line_num, retval = parse_line(line_num, lines, local_namespace, interactive=True,
                                                            skip_input=not inputting)
-            
+
             if retval is not None:  # we got a return value from this function, so we need to pass on the return
                 return lines[line_num], retval
         except (BinPSyntaxError, BinPValueError, BinPArgumentError) as err:
-            print(err)
+            eprint(err)
             line_num += 1
 
 
