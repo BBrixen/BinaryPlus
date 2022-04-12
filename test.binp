@@ -1,9 +1,9 @@
-var null func test = (bool x) =>
-    output "at the beginning"
-    if (x) =>
-        return
-    end
-    output "we did not end early"
-end test
-
-test(False)
+var bool x = true
+while (x) =>
+    output 'enter false to end'
+    var bool x = input
+end
+var null func printer = () =>
+    output 'hello there'
+end printer
+output printer
