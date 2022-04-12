@@ -2,6 +2,9 @@ $ Boolean logic
 var bool myBool2 = true || false
 output true || false = myBool2
 
+$ var bool myBool = (true && false) && true
+$ output "myBool" = (true && false) && true =  myBool
+
 $ Do a semi-complex math expression
 var int myInt = 1 + 2 * 5
 var int myIntTwo = (1 + 2) * 5

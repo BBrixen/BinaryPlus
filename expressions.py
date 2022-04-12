@@ -68,6 +68,7 @@ class OpNode:
     or a value (a boolean or integer) and the leaves can be
     an OpNode subtree or None
     """
+
     def __init__(self, op: Operator, val=None):
         self.op = op
         self.val = val
@@ -206,9 +207,11 @@ def arith_factor(tokens: list[str]) -> OpNode:
     if isinstance(mine, int):
         return OpNode(Operator.INT, mine)
 
-    assert mine == "(", "Invalid syntax. Expected parenthesis"  # TODO Proper exception
+    # TODO Proper exception
+    assert mine == "(", "Invalid syntax. Expected parenthesis"
     root = arith_expr(tokens)
-    assert tokens.pop(0) == ")", "Expected closing paranthesis"  # TODO Proper exception
+    # TODO Proper exception
+    assert tokens.pop(0) == ")", "Expected closing paranthesis"
     return root
 
 
@@ -232,7 +235,8 @@ def bool_expr(tokens: list[str]):
     elif isinstance(mine, int):
         op = Operator.INT
     else:
-        assert type(mine) in {int, bool}, "Token is not a boolean"  # TODO Proper exception
+        # TODO Proper exception
+        assert type(mine) in {int, bool}, "Token is not a boolean"
 
     lchild = OpNode(op, mine)
     return bool_op(tokens, lchild)
