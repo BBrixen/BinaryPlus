@@ -4,7 +4,7 @@ import re
 import os
 import sys
 
-from errors import BinPSyntaxError, BinPValueError, BinPArgumentError
+from errors import BinPSyntaxError, BinPValueError, BinPArgumentError, BinPRuntimeError, eprint
 from binp_functions import create_function, parse_function_call
 from evaluators import namespace_replacement, determine_evaluator
 from conditionals import handle_if, handle_while
@@ -19,14 +19,6 @@ BEGIN_PRINT = " >> "
 INTERACTIVE_PRINT = " -- "
 INTERACTIVE_PRINT_NESTED = ' ---- '
 INTERACTIVE = False
-
-
-def eprint(*args, **kwargs):
-    """
-    A print() function which outputs to STDERR
-    as opposed to STDOUT
-    """
-    print(*args, file=sys.stderr, **kwargs)
 
 
 def parse_line(line_num: int, lines: list[str], local_namespace: dict,
@@ -192,7 +184,7 @@ def run_program(lines: list[str], local_namespace: dict) -> (str, None | list[st
     while line_num < len(lines):
         try:
             local_namespace, line_num, retval = parse_line(line_num, lines, local_namespace)
-        except (BinPSyntaxError, BinPValueError, BinPArgumentError) as err:
+        except (BinPSyntaxError, BinPValueError, BinPArgumentError, BinPRuntimeError) as err:
             print(err)  # change this to 'raise err' if you want the stacktrace of the exception
             sys.exit(3)
 
