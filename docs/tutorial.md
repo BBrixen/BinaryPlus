@@ -4,9 +4,14 @@ Binary Plus is an **interpreted language** meaning the program will evaluate you
 
 As the name suggests, the only operators that are supported are binary operators (two arguments required).
 
+## Video Tutorial
+
+Bennett has made a video tutorial that covers many of the topics discussed here. [Click here to go to the video](https://www.youtube.com/watch?v=UMEBoMbGG5w)
+
 ## Table of Contents
 
 - [Binary Plus Tutorial](#binary-plus-tutorial)
+  - [Video Tutorial](#video-tutorial)
   - [Table of Contents](#table-of-contents)
   - [Hello World](#hello-world)
   - [Comments](#comments)
