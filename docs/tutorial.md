@@ -195,7 +195,7 @@ end
 
 ## User Input
 
-User input can be gotten one of two ways
+User input can be obtained in two ways
 
 1. The `input` command
 2. Command line arguments
