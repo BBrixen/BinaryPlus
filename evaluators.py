@@ -136,7 +136,6 @@ def str_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) -
 
 
 def namespace_replacement(line: str, local_namespace: dict) -> str:
-    # TODO: add support of tuple indexing in namespace search, this can be done in its own method
     """
     This nifty little function searches through a line and replaces every valid mention of a variable
     with its value inside the namespace

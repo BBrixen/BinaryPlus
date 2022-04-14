@@ -1,9 +1,0 @@
-var bool x = true
-while (x) =>
-    output 'enter false to end'
-    var bool x = input
-end
-var null func printer = () =>
-    output 'hello there'
-end printer
-output printer

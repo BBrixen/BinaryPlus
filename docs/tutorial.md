@@ -126,6 +126,13 @@ var str myString2 = here are some\nwords on a single line
 $ Variables can be re-defined (with different types)
 var int myVariable = 5
 var bool myVariable = false
+
+$ If you want to use unary operators, like - for integers or ! for booleans,
+$ then you will need to define your own functions for those
+$ However! We have included our own int_negate and bool_negate for you
+$ These functions are already defined in the global namespace and can perform unary negation
+var int x = int_negate(10)
+var bool y = bool_negate(false)
 ```
 
 ## Printing/Outputting to Console

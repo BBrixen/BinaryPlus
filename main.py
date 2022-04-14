@@ -5,7 +5,7 @@ import os
 import sys
 
 from errors import BinPSyntaxError, BinPValueError, BinPArgumentError, BinPRuntimeError, eprint
-from functions import create_function, parse_function_call
+from functions import create_function, parse_function_call, BinPFunction
 from evaluators import namespace_replacement, determine_evaluator
 from conditionals import handle_if, handle_while
 
@@ -321,6 +321,27 @@ def get_cli_args(args) -> dict:
     return retval
 
 
+def get_unaries(global_namespace: dict) -> dict:
+    """
+    This defines two unary functions, int_negate and bool_negate,
+    which are used to perform unary operations,
+    since we do not have support for those in normal expressions
+    :param global_namespace: the global namespace with command line arguments
+    :return: the global namespace with two built-in functions added
+    """
+    int_negate_params = [('int', 'x')]
+    int_negate_lines = [' return 0 - x ']
+    int_negate = BinPFunction('int_negate', 'int', int_negate_params, int_negate_lines)
+    global_namespace['int_negate'] = int_negate
+
+    bool_negate_params = [('bool', 'x')]
+    bool_negate_lines = [' if ( x ) = > ', ' return false ', ' end ', ' return true ']
+    bool_negate = BinPFunction('bool_negate', 'bool', bool_negate_params, bool_negate_lines)
+    global_namespace['bool_negate'] = bool_negate
+
+    return global_namespace
+
+
 def main() -> None:
     """
     takes a filename as an input, reads it and runs it as a binary+ program
@@ -328,7 +349,8 @@ def main() -> None:
     """
     args = sys.argv
     if len(args) <= 1:  # interactive version
-        run_interactive({})
+        global_namespace = get_unaries({})  # interactive starts with no CLI and only unaries
+        run_interactive(global_namespace)
         return
 
     # getting and loading file
@@ -343,6 +365,7 @@ def main() -> None:
     global_namespace = {
         **get_cli_args(args[2:]),
     }
+    global_namespace = get_unaries(global_namespace)
     lines = format_file(file)
     run_program(lines, global_namespace)
 

@@ -3,6 +3,8 @@ $ we cannot negate integers and booleans easily.
 $ To get around this, we can utilize functions which will act as out unary operators
 $ We have created these function already for you,
 $ so you do not have to go through he hassle of creating these yourselves
+$ you can just call bool_negate and int_negate in your code and it will automatically work
+$ (there is no need to copy paste these definitions)
 
 $ This function takes a boolean as input and returns its negation
 $ Calling this function is equivalent to using the unary operator !
