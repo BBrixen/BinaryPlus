@@ -185,7 +185,7 @@ def replace_all_variables(line_num: int, line: str, vals: list[str], local_names
     :param local_namespace: the namespace with all variables and functions
     :return: list of all values replaced with their evaluation in the namespace
     """
-    from binp_functions import BinPFunction, parse_function_call
+    from functions import BinPFunction, parse_function_call
     for i, val in enumerate(vals):
         if val in local_namespace and not isinstance(local_namespace[val], BinPFunction):
             vals[i] = local_namespace[val]

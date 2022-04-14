@@ -1,0 +1,6 @@
+var int func multiplier = (int x, int y) =>
+    return x * y
+end multiplier
+
+var int result = multiplier(2, 7, 9)
+output result

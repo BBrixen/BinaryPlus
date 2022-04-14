@@ -50,11 +50,10 @@ class BinPFunction:
         :return: a value which this function returns, possibly modifying the outer namespace
         """
         from main import run_program  # we put this inside the function to avoid an import loop
-
         # make sure the parameters passed are the correct length
-        if len(params) != len(self._params) and (self._params == [] and params != [[]]):
+        if len(params) != len(self._params) and (self._params != [] and params != [[]]):
             raise BinPArgumentError(line_num, line, message=f"Incorrect number of arguments in {self._name} call"
-                                                            f"\nExpected: {self._params} \nGot: {params}")
+                                                            f"\n{self}")
 
         # modify the namespace with parameters passed in
         for i in range(len(self._params)):

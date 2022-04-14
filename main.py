@@ -5,7 +5,7 @@ import os
 import sys
 
 from errors import BinPSyntaxError, BinPValueError, BinPArgumentError, BinPRuntimeError, eprint
-from binp_functions import create_function, parse_function_call
+from functions import create_function, parse_function_call
 from evaluators import namespace_replacement, determine_evaluator
 from conditionals import handle_if, handle_while
 
