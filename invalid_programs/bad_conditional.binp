@@ -1,0 +1,7 @@
+if (true) =>
+    output this is valid
+    output but it has no end so we will get an error
+else =>
+    output this wont be printed
+$ we will get an error because we are missing the end to this if/else statement
+$ so binp does not know when to stop the else block

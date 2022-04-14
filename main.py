@@ -188,7 +188,7 @@ def run_program(lines: list[str], local_namespace: dict) -> (str, None | list[st
             eprint(err)  # change this to 'raise err' if you want the stacktrace of the exception
             sys.exit(3)
 
-        if retval is not None:  # we got a return value from this function, so we need to pass on the return
+        if retval is not None and retval != 'null' and retval != []:  # we got a return value from this function, so we need to pass on the return
             return lines[line_num], retval
 
     if not lines:
