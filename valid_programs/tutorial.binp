@@ -1,0 +1,20 @@
+var int func GCD = (int x, int y) =>
+    while (x != y) =>
+        if (x > y) =>
+            var int x = x - y
+        else =>
+            var int y = y - x
+        end
+    end
+    return x
+end GCD
+
+$ ARG_COUNT = number of arguments passed
+$ ARG_0, ARG_1... ARG_N, n = ARG_COUNT - 1
+if (ARG_COUNT != 2) =>
+    output this program requires 2 arguments
+    return
+end
+
+var int answer = GCD(ARG_0, ARG_1)
+output answer
