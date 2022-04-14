@@ -1,27 +1,31 @@
- _______   __
-/       \ /  |                                            __
-$$$$$$$  |$$/  ___________________   __    __    /  |
-$$ |__$$ |/  |/       \  /      \  /      \ /  |  /  | __$$ |__
-$$    $$< $$ |$$$$$$$  | $$$$$$  |/$$$$$$  |$$ |  $$ |/  $$    |
-$$$$$$$  |$$ |$$ |  $$ | /    $$ |$$ |  $$/ $$ |  $$ |$$$$$$$$/
-$$ |__$$ |$$ |$$ |  $$ |/$$$$$$$ |$$ |      $$ \__$$ |   $$ |
-$$    $$/ $$ |$$ |  $$ |$$    $$ |$$ |      $$    $$ |   $$/
-$$$$$$$/  $$/ $$/   $$/  $$$$$$$/ $$/        $$$$$$$ |
-                                            /  \__$$ |
-                                            $$    $$/
-                                             $$$$$$/
+ _______     __
+/       \   /  |
+$$$$$$$  |  $$/  _______    ______     ____    __    __     __
+$$ |__$$ |  /  |/       \  /      \  /      \ /  |  /  | __$$ |__
+$$    $$<   $$ |$$$$$$$  | $$$$$$  |/$$$$$$  |$$ |  $$ |/  $$    |
+$$$$$$$  |  $$ |$$ |  $$ | /    $$ |$$ |  $$/ $$ |  $$ |$$$$$$$$/
+$$ |__$$ |  $$ |$$ |  $$ |/$$$$$$$ |$$ |      $$ \__$$ |   $$ |
+$$    $$ /  $$ |$$ |  $$ |$$    $$ |$$ |      $$    $$ |   $$/
+$$$$$$$ /   $$/ $$/   $$/  $$$$$$$/ $$/        $$$$$$$ |
+                                              /  \__$$ |
+                                              \$$   $$/
+                                               \$$$$$/
 
 
-**This project requires Python 3.10 to be installed.**
+!!! THIS PROJECT REQUIRES PYTHON 3.10 TO BE INSTALLED !!!
+!!! THIS PROJECT REQUIRES PYTHON 3.10 TO BE INSTALLED !!!
+!!! THIS PROJECT REQUIRES PYTHON 3.10 TO BE INSTALLED !!!
+!!! THIS PROJECT REQUIRES PYTHON 3.10 TO BE INSTALLED !!!
+!!! THIS PROJECT REQUIRES PYTHON 3.10 TO BE INSTALLED !!!
 
-You can check this by running "python --version" or "python3 --version". You should be using at least Python 3.10.0 (sadly, lectura only has 3.8 so you cannot run it there).
+You can check your python version by running "python --version" or "python3 --version". You should be using at least Python 3.10.0 (sadly, lectura only has 3.8 so you cannot run it there).
 
-If you don't have Python 3.10 installed, you should be able to install it via your package manager (apt, homebrew, etc.) or from https://python.org/downloads/
+If you do not have Python 3.10 installed, you should be able to install it via your package manager (apt, homebrew, etc.) or from https://python.org/downloads/
 
 Alternatively, you can use the "pyenv" software to create a virtual Python environment. See the following link for more details: https://github.com/pyenv/pyenv#installation
 
 
-==========Project layout==========
+==========Project Layout==========
 
 binp.py
 The interpreter/program that runs your code
