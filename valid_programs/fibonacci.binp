@@ -1,0 +1,21 @@
+
+$ Define fibonacci function which returns the nth fibonacci number
+var int func fib = (int n) =>
+    if (n == 0) =>
+        return 0
+    end
+    if (n == 1) =>
+        return 1
+    end
+
+    return fib(n-1) + fib(n - 2)
+end fib
+
+$ Print the first 12 fibonacci numbers
+var int i = 0
+while (i < 12) =>
+    var int retval = fib(i)
+    output retval
+
+    var int i = i + 1
+end
