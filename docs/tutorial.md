@@ -212,11 +212,11 @@ var bool userBoolean = input
 The global namespace has the `ARG_COUNT` variable defined that gives the number of command line arguments passed in to the program. Each argument can then be accessed via `ARG_X` where `X` is the argument index (indexing is 0-based). Here is an example using `valid_programs/arguments.binp`:
 
 ```bash
-$ ./binp valid_programs/arguments.binp
+$ ./binp.py valid_programs/arguments.binp
  >> This program expects that the file be called with three arguments like so:
  >> python binp.py arg1 arg2 arg3
 
-$ ./binp valid_programs/arguments.binp quick brown fox
+$ ./binp.py valid_programs/arguments.binp quick brown fox
  >> Number of arguments: 3
  >> =======================
  >> first arg: quick
