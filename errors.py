@@ -1,5 +1,6 @@
 import sys
 
+
 def eprint(*args, **kwargs):
     """
     A print() function which outputs to STDERR

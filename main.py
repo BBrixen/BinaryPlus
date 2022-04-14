@@ -58,7 +58,7 @@ def parse_line(line_num: int, lines: list[str], local_namespace: dict,
                 local_namespace, line_num = var_assign(x, line_num, lines, local_namespace,
                                                        execute=execute, interactive=interactive)
 
-        case['if', '(', *conditions, ')', '=', '>']:  # if statement
+        case ['if', '(', *conditions, ')', '=', '>']:  # if statement
             local_namespace, line_num, retval = handle_if(line_num, lines, conditions, local_namespace,
                                                           execute=execute,
                                                           interactive=interactive,
@@ -187,13 +187,25 @@ def run_program(lines: list[str], local_namespace: dict) -> (str, None | list[st
         except (BinPSyntaxError, BinPValueError, BinPArgumentError, BinPRuntimeError) as err:
             eprint(err)  # change this to 'raise err' if you want the stacktrace of the exception
             sys.exit(3)
+        except (TypeError, AttributeError):
+            err = BinPValueError(line_num, lines[line_num],
+                                 message='Improper Type, most likely due to null type or improper variable assignment')
+            eprint(err)
+            sys.exit(3)
+        except KeyboardInterrupt:
+            sys.exit(3)
+        except:  # we want to catch all other errors and apologize to the user
+            err = BinPSyntaxError(line_num, lines[line_num],
+                                  message='Oops, we appear to have an uncaught error. Sorry!')
+            eprint(err)
+            sys.exit(3)
 
-        if retval is not None and retval != 'null' and retval != []:  # we got a return value from this function, so we need to pass on the return
+        if retval is not None and retval != 'null':  # we got a return value from this function, so we need to pass on the return
             return lines[line_num], retval
 
     if not lines:
         return None, None
-    return lines[line_num-1], None  # return none since there was no return in this section
+    return lines[line_num - 1], None  # return none since there was no return in this section
 
 
 def run_interactive(local_namespace: dict) -> (str, None | list[str]):
@@ -218,7 +230,7 @@ def run_interactive(local_namespace: dict) -> (str, None | list[str]):
                 new_line = format_line(input(INTERACTIVE_PRINT))
                 lines.append(new_line)
                 inputting = True
-                line_num = len(lines)-1
+                line_num = len(lines) - 1
         except (KeyboardInterrupt, EOFError):
             sys.exit(3)
 

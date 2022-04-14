@@ -1,0 +1,8 @@
+$ this is the bug which i had during my tutorial video
+$ i have since added something to catch it and print it to the user
+
+$ i had forgotten to put function, so instead i just had null main
+var null main = () =>
+    output we are in main
+end main
+main()
