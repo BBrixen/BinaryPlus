@@ -1,0 +1,31 @@
+$ Since binary plus has no unary operators,
+$ we cannot negate integers and booleans easily.
+$ To get around this, we can utilize functions which will act as out unary operators
+$ We have created these function already for you,
+$ so you do not have to go through he hassle of creating these yourselves
+
+$ This function takes a boolean as input and returns its negation
+$ Calling this function is equivalent to using the unary operator !
+$ bool_negate(x) === !x
+var bool func bool_negate = (bool x) =>
+    if (x) =>
+        return false
+    end
+    return true
+end bool_negate
+
+$ This function takes an integer as input and returns its negation
+$ calling this function is equivalent to using the unary operator -
+var int func int_negate = (int x) =>
+    return 0-x
+end int_negate
+
+
+$ these are just examples of using the functions
+var int x = 1
+var int x = int_negate(x)
+output x
+
+var bool x = true
+var bool x = bool_negate(x)
+output x
