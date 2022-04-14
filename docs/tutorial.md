@@ -1,5 +1,9 @@
 # Binary Plus Tutorial
 
+Binary Plus is an **interpreted language** meaning the program will evaluate your `.binp` file line-by-line. Along with this tutorial, we have many various valid and invalid program examples within the `valid_programs/` and `invalid_programs/` folders.
+
+As the name suggests, the only operators that are supported are binary operators (two arguments required).
+
 ## Table of Contents
 
 - [Binary Plus Tutorial](#binary-plus-tutorial)
@@ -9,7 +13,10 @@
   - [Variable Assignment](#variable-assignment)
   - [Printing/Outputting to Console](#printingoutputting-to-console)
   - [Function Declarations](#function-declarations)
-  - [Conditionals](#conditionals)
+  - [Conditionals and Loops](#conditionals-and-loops)
+  - [User Input](#user-input)
+    - [The `input` command](#the-input-command)
+    - [Command Line Arguments](#command-line-arguments)
   - [Interactive system](#interactive-system)
 
 ## Hello World
@@ -38,8 +45,6 @@ $ all of these lines are ignored by the interpreter
 ```
 
 ## Variable Assignment
-
-TODO Write
 
 Syntax is as follows:
 
@@ -73,8 +78,13 @@ $ (otherwise it would be Unary Plus!)
 var int negativeNumber = 0 - 10
 
 
-$ || = or, && = and
+$ || is the OR operator, && is the AND operator
+$ Since the language only has binary operators, there is no
+$ negation operator. A negation function can be made if this is needed.
 var bool myBool = (true || false) && (false || false)
+
+$ true, True, false, and False are valid boolean terms
+var bool myBool2 = (True && true) || (false && False)
 
 
 $ Quotes are not needed around strings
@@ -97,7 +107,7 @@ var bool myVariable = false
 
 ## Printing/Outputting to Console
 
-The `output` command is used to print to standard out. It behaves similarly to Python 2's print statement. Everything after the `output` command is printed to the console. A newline is implicitly added to the end
+The `output` command is used to print to standard out. It behaves similarly to Ruby's `puts` command. The major difference is the quotes around the string is not needed. `output` also has the feature of finding variables within your string and replacing them in the output. A newline is implicitly added to the end of the string.
 
 ```binp
 $ prints "hello world!" to the screen
@@ -111,19 +121,111 @@ output Hello, name!
 $ To escape a variable name surround the word in quotes
 $ this prints "the value of retval is 5"
 var int retval = 5
-output the value of "retval" is retval
+output the value of 'retval' is retval
 ```
 
 ## Function Declarations
 
-TODO Write
+Functions are written slightly differently than most languages. To create a function, we first create an anonymous function which we then assign a name to (via variable assignment)
 
-TODO Inner scopes cannot modify outer scopes
+```
+var <return type> func <function name> = (<arguments>) =>
+    <code>
+end <function name>
+```
 
-## Conditionals
+Possible return types are `bool`, `int`, `str`, or `null` (akin to `void` in Java).
 
-TODO Write
+Functions have their own variable scope that is separate from the "global" scope. Functions definitions can also be nested like in Python. Do note that a function can only modify it's own scope (it is unable to modify parent scopes).
+
+Here are a few function examples:
+
+```binp
+$ A function which takes no arguments and returns 5
+var int func five = () =>
+    return 5
+end five
+
+var int myValue = five()
+output myValue
+
+
+$ Return the max of two integers
+var int max = (int a, int b) =>
+    if (a < b) =>
+        return b
+    end
+
+    return a
+end max
+```
+
+## Conditionals and Loops
+
+Binary Plus supports `if` conditions and `while` loops. Here is the general syntax for them:
+
+```binp
+if (<boolean condition>) =>
+    <code if condition is true>
+else =>
+    <code if the condition is false>
+end
+
+$ An if condition with the else block omitted
+if (<boolean condition>) =>
+    <code if condition is true>
+end
+
+while (<boolean conditoin>) =>
+    <code if condition is true>
+else =>
+    <code that runs once the condition is false>
+end
+
+$ A while loop with the else block omitted
+while (<boolean conditoin>) =>
+    <code if condition is true>
+end
+```
+
+## User Input
+
+User input can be gotten one of two ways
+
+1. The `input` command
+2. Command line arguments
+
+### The `input` command
+
+The input command allows for keyboard input.
+
+```binp
+var str userString = input
+
+$ the user input is automatically casted to the variable type
+var int userInteger = input
+var bool userBoolean = input
+```
+
+### Command Line Arguments
+
+The global namespace has the `ARG_COUNT` variable defined that gives the number of command line arguments passed in to the program. Each argument can then be accessed via `ARG_X` where `X` is the argument index (indexing is 0-based). Here is an example using `valid_programs/arguments.binp`:
+
+```bash
+$ ./binp valid_programs/arguments.binp
+ >> This program expects that the file be called with three arguments like so:
+ >> python binp.py arg1 arg2 arg3
+
+$ ./binp valid_programs/arguments.binp quick brown fox
+ >> Number of arguments: 3
+ >> =======================
+ >> first arg: quick
+ >> second arg: brown
+ >> third arg: fox
+```
+
+In the above example, "quick" is `ARG_0`, "brown" is `ARG_1` and "fox" is `ARG_2`
 
 ## Interactive system
 
-TODO Write
+Just like Python, the Binary Plus file can be executed without passing a file to run the interactive system. This allows you to test out Binary Plus code without having to write it in a file. `Ctrl-C` can be used to terminate the interactive system.
