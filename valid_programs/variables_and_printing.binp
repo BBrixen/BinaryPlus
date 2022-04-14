@@ -23,7 +23,7 @@ var bool x = x
 output x
 
 $ boolean expressions
-var bool x = True && False || True
+var bool x = True && False
 output x
 
 $ integer expressions

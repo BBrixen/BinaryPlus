@@ -2,8 +2,8 @@ $ Boolean logic
 var bool myBool2 = true || false
 output true || false = myBool2
 
-$ var bool myBool = (true && false) && true
-$ output "myBool" = (true && false) && true =  myBool
+$ var bool myBool = True && False
+$ output "myBool" = True && False = myBool
 
 $ Do a semi-complex math expression
 var int myInt = 1 + 2 * 5

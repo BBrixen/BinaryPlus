@@ -43,15 +43,10 @@ BINARY_OPERATOR_MAP = {
     Operator.NOT_EQUAL:     lambda x, y: x != y
 }
 
-BINARY_OPERATOR_STRING = {
-    "+":  Operator.ADD,
-    "-":  Operator.SUB,
-    "/":  Operator.DIV,
-    "*":  Operator.MUL,
+BOOL_OPERATORS = {
     "||": Operator.OR,
     "&&": Operator.AND,
 
-    "%":  Operator.MODULUS,
     ">":  Operator.GREATER_THAN,
     "<":  Operator.LESS_THAN,
     ">=": Operator.GREATER_EQUAL,
@@ -207,60 +202,39 @@ def arith_factor(tokens: list[str]) -> OpNode:
     if isinstance(mine, int):
         return OpNode(Operator.INT, mine)
 
-    # TODO Proper exception
     assert mine == "(", "Invalid syntax. Expected parenthesis"
     root = arith_expr(tokens)
-    # TODO Proper exception
     assert tokens.pop(0) == ")", "Expected closing paranthesis"
     return root
 
 
 def gen_bool_tree(tokens) -> OpNode | None:
-    # TODO Account for parenthesis and negation
-    # TODO Reverse list and pop off last element for better performance
-    #  maybe use an index parameter instead of popping elements
-    #  (check parse_function_call in bin_p_functions.py for an example)
-    # print(tokens)
-    root = bool_expr(tokens)
+    if len(tokens) == 1:
+        return bool_leaf(tokens[0])
+
+    assert len(tokens) == 3, "A boolean expression must be two ints or booleans with a boolean operator in between"
+    left, root, right = tokens
+    root = bool_op(root)
+    root.left = bool_leaf(left)
+    root.right = bool_leaf(right)
+
+    assert root.left.op == root.right.op, "Both operands must be of the same type"
+    if root.left.op == Operator.BOOL:
+        assert root.op in {Operator.ADD, Operator.OR}, "Booleans only support && and || operations"
     return root
 
 
-def bool_expr(tokens: list[str]):
-    if len(tokens) == 0:
-        return None
+def bool_op(token: str) -> OpNode:
+    assert token in BOOL_OPERATORS, "Operator is not a valid boolean operator"
+    return OpNode(BOOL_OPERATORS[token])
 
-    mine = tokens.pop(0)
-    if isinstance(mine, bool):
-        op = Operator.BOOL
-    elif isinstance(mine, int):
+
+def bool_leaf(token):
+    if type(token) == int:
         op = Operator.INT
+    elif type(token) == bool:
+        op = Operator.BOOL
     else:
-        # TODO Proper exception
-        assert type(mine) in {int, bool}, "Token is not a boolean"
+        assert False, "Operand is not a boolean or integer"
 
-    lchild = OpNode(op, mine)
-    return bool_op(tokens, lchild)
-
-
-def bool_op(tokens: list[str], lchild: OpNode):
-    if len(tokens) == 0:
-        return lchild  # Epsilon
-
-    mine = tokens.pop(0)
-    if mine not in BINARY_OPERATOR_STRING:
-        assert False, "Incorrect boolean operator"  # TODO Proper exception
-
-    op = BINARY_OPERATOR_STRING[mine]
-
-    root = OpNode(op)
-    root.left = lchild
-    root.right = bool_expr(tokens)
-
-    return root
-
-
-# TODO Remove
-if __name__ == "__main__":
-    tokens = [1, "!=", 1, "||", True]
-    root = gen_bool_tree(tokens)
-    print(eval_tree(root))
+    return OpNode(op, token)

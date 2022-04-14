@@ -92,12 +92,17 @@ var int negativeNumber = 0 - 10
 
 
 $ || is the OR operator, && is the AND operator
-$ Since the language only has binary operators, there is no
-$ negation operator. A negation function can be made if this is needed.
-var bool myBool = (true || false) && (false || false)
-
 $ true, True, false, and False are valid boolean terms
-var bool myBool2 = (True && true) || (false && False)
+var bool myBool = true || alse
+var bool myBool2 = True && False
+
+$ Integers can also be compared to create booleans
+$ We have the usual !=, ==, <, <=, >, >= operators
+var bool myBool3 1 != 2
+
+$ Unlike int expressions, a boolean expression is limited to
+$ having a single boolean operation between two values
+var bool myBool3 = 1 > 3
 
 
 $ Quotes are not needed around strings

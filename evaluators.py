@@ -15,8 +15,8 @@ def int_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) -
     :return: the integer result of calculating everything in vals
     """
     tokens = int_replacement(line_num, line, vals, local_namespace)
-    root = gen_math_tree(tokens)
     try:
+        root = gen_math_tree(tokens)
         return eval_tree(root)
     except Exception as e:
         raise BinPRuntimeError(line_num, line, message=str(e))
@@ -63,8 +63,8 @@ def bool_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) 
     :return: the boolean result of calculating everything in vals
     """
     tokens = bool_replacement(line_num, line, vals, local_namespace)  # convert into all booleans or &&/||
-    root = gen_bool_tree(tokens)
     try:
+        root = gen_bool_tree(tokens)
         return eval_tree(root)
     except Exception as e:
         raise BinPRuntimeError(line_num, line, message=str(e))

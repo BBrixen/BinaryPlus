@@ -3,3 +3,10 @@ $ This is invalid and should cause an error
 var bool myBool = 5 / 2 + 1
 
 output myBool
+
+
+$ Using a relational operator on booleans
+$ This is invalid and should cause an error
+var bool myBool2 = true > false
+
+output myBool2
