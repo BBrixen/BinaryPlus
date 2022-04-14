@@ -1,4 +1,4 @@
-from errors import BinPValueError
+from errors import BinPValueError, BinPRuntimeError
 from expressions import gen_bool_tree, eval_tree, gen_math_tree
 from collections.abc import Callable
 
@@ -16,7 +16,10 @@ def int_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) -
     """
     tokens = int_replacement(line_num, line, vals, local_namespace)
     root = gen_math_tree(tokens)
-    return eval_tree(root)
+    try:
+        return eval_tree(root)
+    except Exception as e:
+        raise BinPRuntimeError(line_num, line, message=str(e))
 
 
 def int_replacement(line_num: int, line: str, vals: list[str], local_namespace: dict) -> list[bool | str]:
@@ -61,7 +64,10 @@ def bool_eval(line_num: int, line: str, vals: list[str], local_namespace: dict) 
     """
     tokens = bool_replacement(line_num, line, vals, local_namespace)  # convert into all booleans or &&/||
     root = gen_bool_tree(tokens)
-    return eval_tree(root)
+    try:
+        return eval_tree(root)
+    except Exception as e:
+        raise BinPRuntimeError(line_num, line, message=str(e))
 
 
 def bool_replacement(line_num: int, line: str, vals: list[str], local_namespace: dict) -> list[bool | str]:
