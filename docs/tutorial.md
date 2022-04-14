@@ -6,22 +6,16 @@ As the name suggests, the only operators that are supported are binary operators
 
 ## Video Tutorial
 
-Bennett has made a video tutorial that covers many of the topics discussed here. [Click here to go to the video](https://www.youtube.com/watch?v=UMEBoMbGG5w)
-
-Note: If you have pycharm installed, and you want to use the syntax highlighting that I used in my video, follow these steps.
- - Make a copy of your current color scheme configuration: `File > Settings > Editor > Color Scheme > Gear icon > Export > Color scheme plugin (.jar)`
- - Save this copy somewhere, you might want it later
- - Download the color scheme I provided for you: `Binary Plus zip > docs > binp_colors.jar`
- - Import the color scheme I provided: `File > Settings > Editor > Color Scheme > Gear icon > Import > follow the steps to import the file I provided`
- - Open any pycharm and make a file ending in `.binp` and begin typing. It should highlight your syntax.
- - When you want to revert to your old color scheme (if you even want to, personally I think my color scheme is amazing and you should try it): `File > Settings > Editor > Color Scheme > Gear icon > Import > follow the steps to import the file you created at the beginning`
+Bennett has made a video tutorial that covers many of the topics discussed here.  
+[Click here to go to the video](https://www.youtube.com/watch?v=UMEBoMbGG5w)
 
 ## Table of Contents
 
 - [Binary Plus Tutorial](#binary-plus-tutorial)
   - [Video Tutorial](#video-tutorial)
   - [Table of Contents](#table-of-contents)
-  - [Hello World](#hello-world)
+  - [PyCharm Syntax Highlighting](#pycharm-syntax-highlighting)
+  - [Hello World Program](#hello-world-program)
   - [Comments](#comments)
   - [Variable Assignment](#variable-assignment)
   - [Printing/Outputting to Console](#printingoutputting-to-console)
@@ -32,7 +26,18 @@ Note: If you have pycharm installed, and you want to use the syntax highlighting
     - [Command Line Arguments](#command-line-arguments)
   - [Interactive system](#interactive-system)
 
-## Hello World
+## PyCharm Syntax Highlighting
+
+Note: If you have pycharm installed, and you want to use the syntax highlighting that is used in the [video tutorial](#video-tutorial), follow these steps.
+
+- Make a copy of your current color scheme configuration: `File > Settings > Editor > Color Scheme > Gear icon > Export > Color scheme plugin (.jar)`
+- Save this copy somewhere, you might want it later
+- Download the color scheme I provided for you: `Binary Plus zip > docs > binp_colors.jar`
+- Import the color scheme I provided: `File > Settings > Editor > Color Scheme > Gear icon > Import > follow the steps to import the file I provided`
+- Open any pycharm and make a file ending in `.binp` and begin typing. It should highlight your syntax.
+- When you want to revert to your old color scheme (if you even want to, personally I think my color scheme is amazing and you should try it): `File > Settings > Editor > Color Scheme > Gear icon > Import > follow the steps to import the file you created at the beginning`
+
+## Hello World Program
 
 All files end with `.binp`. Here is an example `hello_world.binp`:
 
