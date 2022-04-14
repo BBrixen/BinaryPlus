@@ -1,0 +1,39 @@
+ _______   __
+/       \ /  |                                            __
+$$$$$$$  |$$/  ___________________   __    __    /  |
+$$ |__$$ |/  |/       \  /      \  /      \ /  |  /  | __$$ |__
+$$    $$< $$ |$$$$$$$  | $$$$$$  |/$$$$$$  |$$ |  $$ |/  $$    |
+$$$$$$$  |$$ |$$ |  $$ | /    $$ |$$ |  $$/ $$ |  $$ |$$$$$$$$/
+$$ |__$$ |$$ |$$ |  $$ |/$$$$$$$ |$$ |      $$ \__$$ |   $$ |
+$$    $$/ $$ |$$ |  $$ |$$    $$ |$$ |      $$    $$ |   $$/
+$$$$$$$/  $$/ $$/   $$/  $$$$$$$/ $$/        $$$$$$$ |
+                                            /  \__$$ |
+                                            $$    $$/
+                                             $$$$$$/
+
+
+**This project requires Python 3.10 to be installed.**
+
+You can check this by running "python --version" or "python3 --version". You should be using at least Python 3.10.0 (sadly, lectura only has 3.8 so you cannot run it there).
+
+If you don't have Python 3.10 installed, you should be able to install it via your package manager (apt, homebrew, etc.) or from https://python.org/downloads/
+
+Alternatively, you can use the "pyenv" software to create a virtual Python environment. See the following link for more details: https://github.com/pyenv/pyenv#installation
+
+
+==========Project layout==========
+
+binp.py
+The interpreter/program that runs your code
+
+src/
+The source code that makes up binp.py
+
+docs/
+Contains documentation. See the tutorial page to get started
+
+valid_programs/
+Contains valid example programs
+
+invalid_programs/
+Contains invalid example programs
