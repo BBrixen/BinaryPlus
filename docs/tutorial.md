@@ -8,6 +8,14 @@ As the name suggests, the only operators that are supported are binary operators
 
 Bennett has made a video tutorial that covers many of the topics discussed here. [Click here to go to the video](https://www.youtube.com/watch?v=UMEBoMbGG5w)
 
+Note: If you have pycharm installed, and you want to use the syntax highlighting that I used in my video, follow these steps.
+ - Make a copy of your current color scheme configuration: `File > Settings > Editor > Color Scheme > Gear icon > Export > Color scheme plugin (.jar)`
+ - Save this copy somewhere, you might want it later
+ - Download the color scheme I provided for you: `Binary Plus zip > docs > binp_colors.jar`
+ - Import the color scheme I provided: `File > Settings > Editor > Color Scheme > Gear icon > Import > follow the steps to import the file I provided`
+ - Open any pycharm and make a file ending in `.binp` and begin typing. It should highlight your syntax.
+ - When you want to revert to your old color scheme (if you even want to, personally I think my color scheme is amazing and you should try it): `File > Settings > Editor > Color Scheme > Gear icon > Import > follow the steps to import the file you created at the beginning`
+
 ## Table of Contents
 
 - [Binary Plus Tutorial](#binary-plus-tutorial)
