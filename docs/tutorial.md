@@ -90,12 +90,6 @@ $ The right hand side is evaluated so complex expressions can be made
 $ Math expressions follow PEMDAS rules
 var int mathExpression = (myInteger * 5) / 2
 
-$ Subtraction must be used to declare negative numbers
-$ as Binary Plus only has binary operators
-$ (otherwise it would be Unary Plus!)
-var int negativeNumber = 0 - 10
-
-
 $ || is the OR operator, && is the AND operator
 $ true, True, false, and False are valid boolean terms
 var bool myBool = true || alse
@@ -127,11 +121,11 @@ $ Variables can be re-defined (with different types)
 var int myVariable = 5
 var bool myVariable = false
 
-$ If you want to use unary operators, like - for integers or ! for booleans,
-$ then you will need to define your own functions for those
-$ However! We have included our own int_negate and bool_negate for you
+$ If you want to use unary operators, like - for integers or ! for booleans, the int_negate and bool_negate can be used.
 $ These functions are already defined in the global namespace and can perform unary negation
+$ x is negative 10
 var int x = int_negate(10)
+$ y is true
 var bool y = bool_negate(false)
 ```
 
@@ -158,7 +152,7 @@ output the value of 'retval' is retval
 
 Functions are written slightly differently than most languages. To create a function, we first create an anonymous function which we then assign a name to (via variable assignment)
 
-```
+```text
 var <return type> func <function name> = (<arguments>) =>
     <code>
 end <function name>

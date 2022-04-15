@@ -1,7 +1,6 @@
 from enum import Enum
-# from errors import BinPSyntaxError
 
-
+# An enumc class which holds valid types for each OpNode
 class Operator(Enum):
     INT = object()
     BOOL = object()
@@ -62,6 +61,9 @@ class OpNode:
     in a tree-like manner. The root can contain either an operator
     or a value (a boolean or integer) and the leaves can be
     an OpNode subtree or None
+
+    :param op: the operator which the node contains
+    :param val: used if the node contains some sort of integer or boolean value
     """
 
     def __init__(self, op: Operator, val=None):
@@ -97,7 +99,7 @@ def eval_tree(root: OpNode) -> int | bool:
             return binary_op_func(left, right)
 
         case _:
-            assert False, "Invalid operator given"  # TODO Proper exception
+            assert False, "Invalid operator given"
 
 
 def gen_math_tree(tokens: list[str]) -> OpNode:
@@ -111,33 +113,6 @@ def gen_math_tree(tokens: list[str]) -> OpNode:
     :returns: the root of the expression tree
     """
     return arith_expr(tokens)
-
-
-"""
-Precedence (Lowest to Highest):
-    +, -
-    *, /, %
-    parenthesis
-
-arith_expr -> arith_term arith_expr1
-
-# left-factored and needs lchild
-arith_expr1 -> + arith_term arith_expr1
-             | - arith_term arith_expr1
-             | -- epsilon --
-
-arith_term -> arith_factor arith_term1
-
-# left-factored and needs lchild
-arith_term1 -> * arith_factor arith_term1
-             | / arith_factor arith_term1
-             | % arith_factor arith_term1
-             | -- epsilon --
-
-arith_factor -> ( arith_expr )
-              | INTCON
-
-"""
 
 
 # TODO Docstrings
@@ -208,7 +183,16 @@ def arith_factor(tokens: list[str]) -> OpNode:
     return root
 
 
+
 def gen_bool_tree(tokens) -> OpNode | None:
+    """
+    Generate a simple boolean tree
+    A tree can either have a single node (which is a value)
+    or a tree can have a root node with two children
+
+    :param tokens: a list of tokens which to parse into a tree
+    :return: the root of the parse tree
+    """
     if len(tokens) == 1:
         return bool_leaf(tokens[0])
 
@@ -225,11 +209,21 @@ def gen_bool_tree(tokens) -> OpNode | None:
 
 
 def bool_op(token: str) -> OpNode:
+    """
+    Pull a boolean operator from the beginning of the token stream
+    :param tokens: a token to parse into a node
+    :return: the root of the parse tree
+    """
     assert token in BOOL_OPERATORS, "Operator is not a valid boolean operator"
     return OpNode(BOOL_OPERATORS[token])
 
 
 def bool_leaf(token):
+    """
+    Pull an integer or boolean from the beginning of the token stream
+    :param tokens: a token to parse into a node
+    :return: the root of the parse tree
+    """
     if type(token) == int:
         op = Operator.INT
     elif type(token) == bool:

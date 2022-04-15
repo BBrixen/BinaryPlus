@@ -12,11 +12,9 @@ $ casting and changing types
 $ we cannot change between ints and booleans tho
 var int x = 10
 output 'x as an int is' x
-$ BENNETT: FIX THIS ITS STILL BROKEN
 var str x = x
 output 'x as a str is' x
 
-$ BENNETT: if this is broken then i need to add | 0 and | 1 to the boolean replacement
 $ boolean inference from integers
 var str x = True
 var bool x = x
