@@ -115,14 +115,26 @@ def gen_math_tree(tokens: list[str]) -> OpNode:
     return arith_expr(tokens)
 
 
-# TODO Docstrings
-
 def arith_expr(tokens: list[str]) -> OpNode:
+    """
+    The beginning of searching an arithmetic expression.
+
+    :param tokens: a list of tokens which to parse into a tree
+    :return: the root of the final parse tree
+    """
     lchild = arith_term(tokens)
     return arith_expr1(tokens, lchild)
 
 
 def arith_expr1(tokens: list[str], lchild: OpNode) -> OpNode:
+    """
+    Check if token list starts with a addition/subtraction operator.
+    If so, handle the node creation now. Otherwise, return lchild
+
+    :param tokens: a list of tokens which to parse into a tree
+    :param lchild: the left child node to add to the mathmatical expression
+    :return: the root of the parse tree
+    """
     # Epsilon
     if len(tokens) == 0:
         return lchild
@@ -144,11 +156,24 @@ def arith_expr1(tokens: list[str], lchild: OpNode) -> OpNode:
 
 
 def arith_term(tokens: list[str]) -> OpNode:
+    """
+    Check for higher precedence operators
+    :param tokens: a list of tokens which to parse into a tree
+    :return: the root of the parse tree
+    """
     lchild = arith_factor(tokens)
     return arith_term1(tokens, lchild)
 
 
 def arith_term1(tokens: list[str], lchild: OpNode) -> OpNode:
+    """
+    Check if token list starts with a multiplication/division/modulus operator.
+    If so, handle the node creation now. Otherwise, return lchild
+
+    :param tokens: a list of tokens which to parse into a tree
+    :param lchild: the left child node to add to the mathmatical expression
+    :return: the root of the parse tree
+    """
     # Epsilon
     if len(tokens) == 0:
         return lchild
@@ -173,6 +198,11 @@ def arith_term1(tokens: list[str], lchild: OpNode) -> OpNode:
 
 
 def arith_factor(tokens: list[str]) -> OpNode:
+    """
+    Check if the token list has an integer or paranthesis
+    :param tokens: a list of tokens which to parse into a tree
+    :return: the root of the parse tree
+    """
     mine = tokens.pop(0)
     if isinstance(mine, int):
         return OpNode(Operator.INT, mine)
