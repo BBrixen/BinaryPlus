@@ -220,7 +220,7 @@ def gen_bool_tree(tokens) -> OpNode | None:
 
     assert root.left.op == root.right.op, "Both operands must be of the same type"
     if root.left.op == Operator.BOOL:
-        assert root.op in {Operator.ADD, Operator.OR}, "Booleans only support && and || operations"
+        assert root.op in {Operator.AND, Operator.OR}, "Booleans only support && and || operations"
     return root
 
 
