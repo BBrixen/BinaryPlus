@@ -27,11 +27,8 @@ Alternatively, you can use the "pyenv" software to create a virtual Python envir
 
 ==========Project Layout==========
 
-binp.py
+main.py
 The interpreter/program that runs your code
-
-src/
-The source code that makes up binp.py
 
 docs/
 Contains documentation. See the tutorial page to get started

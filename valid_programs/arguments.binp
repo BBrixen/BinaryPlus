@@ -2,7 +2,7 @@
 
 if (ARG_COUNT < 3) =>
     output This program expects that the file be called with three arguments like so:
-    output python binp.py arg1 arg2 arg3
+    output python main.py arg1 arg2 arg3
 else =>
     output Number of arguments: ARG_COUNT
     output =======================

@@ -48,7 +48,7 @@ output Hello World!
 To run this program, from the command line, type:
 
 ```bash
-$ python binp.py path/to/hello_World.binp
+$ python main.py path/to/hello_World.binp
  >> Hello World!
 ```
 
@@ -236,11 +236,11 @@ var bool userBoolean = input
 The global namespace has the `ARG_COUNT` variable defined that gives the number of command line arguments passed in to the program. Each argument can then be accessed via `ARG_X` where `X` is the argument index (indexing is 0-based). Here is an example using `valid_programs/arguments.binp`:
 
 ```bash
-$ ./binp.py valid_programs/arguments.binp
+$ ./main.py valid_programs/arguments.binp
  >> This program expects that the file be called with three arguments like so:
- >> python binp.py arg1 arg2 arg3
+ >> python main.py arg1 arg2 arg3
 
-$ ./binp.py valid_programs/arguments.binp quick brown fox
+$ ./main.py valid_programs/arguments.binp quick brown fox
  >> Number of arguments: 3
  >> =======================
  >> first arg: quick
