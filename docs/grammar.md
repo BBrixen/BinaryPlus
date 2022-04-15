@@ -14,8 +14,6 @@ number ::= 0 | 1 | ... | 9
 
 var_type ::= bool | int | str | func
 
-string ::= TODO
-
 var_name ::= letter <var_name1>
 var_name1 ::= letter <var_name1>
            | number <var_name1>
@@ -23,6 +21,11 @@ var_name1 ::= letter <var_name1>
            | -- epsilon --
 
 var_expr ::= <string> | <integer> | <bool_expr> | <arith_expr>
+
+integer ::= <number> <integer1>
+integer1 ::= <number> <integer1>
+          | -- epsilon --
+
 
 var_decl ::= var <var_type> <var_name> = <var_expr>
 
